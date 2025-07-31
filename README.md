@@ -1,1 +1,1 @@
-google-ads-preview-platform
+social media-ads-preview-platform
