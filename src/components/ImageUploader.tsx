@@ -59,7 +59,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           />
         </svg>
         <span className="text-base font-small text-gray-600 mb-1">
-          {isLogo ? "Upload image" : allowVideo ? "Upload image or video" : "Upload image"}
+          {isLogo ? "Upload image" : allowVideo ? "Upload video" : "Upload image"}
         </span>
         {/* Remove suggested ratio for all except logo */}
         {isLogo && (

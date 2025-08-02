@@ -1,131 +1,127 @@
 import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { AdTypeSelector } from './components/AdTypeSelector';
-import { PreviewSelector } from './components/PreviewSelector';
-import { SearchAdEditor } from './components/SearchAdEditor';
-import { DisplayAdEditor } from './components/DisplayAdEditor';
-import { YouTubeAdEditor } from './components/YouTubeAdEditor';
-import { DiscoverAdEditor } from './components/DiscoverAdEditor';
-import GmailAdEditor, { GmailAdEditorMobile } from './components/GmailAdEditor';
-import { SearchAdPreview } from './components/SearchAdPreview';
-import { DisplayAdPreview } from './components/DisplayAdPreview';
-import { YouTubeAdPreview } from './components/YouTubeAdPreview';
-import { DiscoverAdPreview } from './components/DiscoverAdPreview';
-import { GmailAdPreview } from './components/GmailAdPreview';
-import { AdType, PreviewMode, SearchAd, DisplayAd, YouTubeAd, DiscoverAd, GmailAd } from './types/ads';
+import { FacebookAdEditor } from './components/FacebookAdEditor';
+import { FacebookAdPreview } from './components/FacebookAdPreview';
+import { InstagramAdEditor } from './components/InstagramAdEditor';
+import { InstagramAdPreview } from './components/InstagramAdPreview';
+import { TikTokAdEditor } from './components/TikTokAdEditor';
+import { TikTokAdPreview } from './components/TikTokAdPreview';
+import { LinkedInAdEditor } from './components/LinkedInAdEditor';
+import { LinkedInAdPreview } from './components/LinkedInAdPreview';
+import { AdType, FacebookAd, InstagramAd, TikTokAd, LinkedInAd, PreviewMode } from './types/ads';
 
 function App() {
-  const [activeAdType, setActiveAdType] = useState<AdType>('search');
-  const [previewMode, setPreviewMode] = useState<PreviewMode>('desktop');
-  const [activePreview, setActivePreview] = useState<string>('collapsed');
+  const [activeAdType, setActiveAdType] = useState<AdType>('facebook');
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('mobile');
+  const [activePreview, setActivePreview] = useState('feed');
 
-  // Add placement state for Search ads
-  const [searchAdPlacement, setSearchAdPlacement] = useState<'with-image' | 'no-image'>('no-image');
-  
-  // Add placement state for Display ads
-  const [displayAdPlacement, setDisplayAdPlacement] = useState('banner');
-
-  // Placement state for YouTube ads
-  const [youtubeAdPlacement, setYoutubeAdPlacement] = useState('feed');
-
-  const [searchAd, setSearchAd] = useState<SearchAd>({
-    headline: 'Your First Headline',
-    description: 'Your first description goes here.',
-    displayUrl: 'www.example.com',
-    finalUrl: 'https://www.example.com',
-    sitelinks: [],
+  const [facebookAd, setFacebookAd] = useState<FacebookAd>({
+    headline: '',
+    description: '',
     image: '',
-  });
-  
-  const [displayAd, setDisplayAd] = useState<DisplayAd>({
-    headline: 'Your compelling headline',
-    description: 'Describe your product or service in a compelling way.',
-    image: '',
-    logo: '',
-    businessName: 'The University of Sheffield',
-    finalUrl: 'https://www.example.com',
-    callToAction: 'Learn more',
-    ctaType: 'learn-more-box',
-    showCTA: true,
-  });
-  
-  const [youtubeAd, setYoutubeAd] = useState<YouTubeAd>({
-    videoThumbnail: '',
-    headline: 'Your video headline',
-    description: 'Video description',
-    callToAction: 'Watch Now',
-    finalUrl: 'https://www.example.com',
-    businessName: 'The University of Sheffield'
-  });
-  
-  const [discoverAd, setDiscoverAd] = useState<DiscoverAd>({
-    headline: 'Your discover headline',
-    description: 'Describe your product or service.',
-    image: '',
-    logo: '',
-    businessName: 'The University of Sheffield',
-    finalUrl: 'https://www.example.com'
-  });
-  
-  const [gmailAd, setGmailAd] = useState<GmailAd>({
-    subject: 'Your email subject',
-    description: 'Your email preview text.',
-    image: '',
-    logo: '',
-    businessName: 'The University of Sheffield',
-    finalUrl: 'https://www.example.com',
-    callToAction: 'Learn more',
-    contentType: 'description-cta',
-    closedContentType: 'subject-cta'
+    businessName: '',
+    finalUrl: '',
+    callToAction: '',
+    aspectRatio: '4:5',
+    mediaType: 'image',
   });
 
-  const [gmailIsOpen, setGmailIsOpen] = useState(false); // NEW: controls Gmail mobile open/closed
+  const [facebookAdPlacement, setFacebookAdPlacement] = useState<'4:5' | '1.91:1' | '1:1'>('4:5');
+
+  const [instagramAd, setInstagramAd] = useState<InstagramAd>({
+    headline: '',
+    description: '',
+    image: '',
+    businessName: '',
+    finalUrl: '',
+    callToAction: '',
+    aspectRatio: '4:5',
+    mediaType: 'image',
+  });
+
+  const [instagramAdPlacement, setInstagramAdPlacement] = useState<'1:1' | '4:5' | '9:16'>('4:5');
+
+  const [tiktokAd, setTiktokAd] = useState<TikTokAd>({
+    headline: '',
+    description: '',
+    video: '',
+    businessName: '',
+    finalUrl: '',
+    callToAction: '',
+    videoLength: 15,
+  });
+
+  const [tiktokAdPlacement, setTiktokAdPlacement] = useState('feed');
+
+  const [linkedinAd, setLinkedinAd] = useState<LinkedInAd>({
+    headline: '',
+    description: '',
+    image: '',
+    businessName: '',
+    finalUrl: '',
+    callToAction: '',
+    aspectRatio: '1:1',
+    mediaType: 'image',
+    carouselType: 'single',
+    carouselImages: ['', ''], // Two default images
+  });
+
+  const [linkedinAdPlacement, setLinkedinAdPlacement] = useState<'1:1' | '4:5' | '2:3' | '1:1.91'>('1:1');
 
   // Reset preview when ad type changes
   const handleAdTypeChange = (type: AdType) => {
     setActiveAdType(type);
     const defaultPreviews = {
-      search: 'serp-top',
-      display: 'banner',
-      youtube: 'feed',
-      discover: 'feed',
-      gmail: 'collapsed'
+      facebook: 'feed',
+      instagram: 'feed',
+      tiktok: 'feed',
+      linkedin: 'feed'
     };
     setActivePreview(defaultPreviews[type]);
     // Reset placements when changing ad types
-    if (type === 'display' && previewMode === 'mobile') {
-      setDisplayAdPlacement('banner');
+    if (type === 'facebook') {
+      setFacebookAdPlacement('4:5');
     }
-    if (type === 'youtube') {
-      setYoutubeAdPlacement('feed');
+    if (type === 'instagram') {
+      setInstagramAdPlacement('4:5');
+    }
+    if (type === 'tiktok') {
+      setTiktokAdPlacement('feed');
+    }
+    if (type === 'linkedin') {
+      setLinkedinAdPlacement('1:1');
     }
   };
 
   // Handle preview mode changes
   const handlePreviewModeChange = (mode: PreviewMode) => {
     setPreviewMode(mode);
-    // Set default placement for Display ads when switching to mobile
-    if (activeAdType === 'display' && mode === 'mobile') {
-      setDisplayAdPlacement('banner');
+    // Set default placement for Facebook ads when switching to mobile
+    if (activeAdType === 'facebook') {
+      setFacebookAdPlacement('4:5');
     }
-    if (activeAdType === 'youtube') {
-      setYoutubeAdPlacement('feed');
+    if (activeAdType === 'instagram') {
+      setInstagramAdPlacement('4:5');
+    }
+    if (activeAdType === 'tiktok') {
+      setTiktokAdPlacement('feed');
+    }
+    if (activeAdType === 'linkedin') {
+      setLinkedinAdPlacement('1:1');
     }
   };
+
   const renderEditor = () => {
     switch (activeAdType) {
-      case 'search':
-        return <SearchAdEditor ad={searchAd} onChange={setSearchAd} placement={searchAdPlacement} onPlacementChange={setSearchAdPlacement} />;
-      case 'display':
-        return <DisplayAdEditor ad={displayAd} onChange={setDisplayAd} placement={displayAdPlacement} mode={previewMode} onPlacementChange={setDisplayAdPlacement} />;
-      case 'youtube':
-        return <YouTubeAdEditor ad={youtubeAd} onChange={setYoutubeAd} placement={youtubeAdPlacement} mode={previewMode} onPlacementChange={setYoutubeAdPlacement} />;
-      case 'discover':
-        return <DiscoverAdEditor ad={discoverAd} onChange={setDiscoverAd} />;
-      case 'gmail':
-        return previewMode === 'mobile'
-          ? <GmailAdEditorMobile ad={gmailAd} onChange={setGmailAd} isOpen={gmailIsOpen} />
-          : <GmailAdEditor ad={gmailAd} onChange={setGmailAd} />;
+      case 'facebook':
+        return <FacebookAdEditor ad={facebookAd} onChange={setFacebookAd} placement={facebookAdPlacement} onPlacementChange={setFacebookAdPlacement} />;
+      case 'instagram':
+        return <InstagramAdEditor ad={instagramAd} onChange={setInstagramAd} placement={instagramAdPlacement} onPlacementChange={setInstagramAdPlacement} />;
+      case 'tiktok':
+        return <TikTokAdEditor ad={tiktokAd} onChange={setTiktokAd} placement={tiktokAdPlacement} onPlacementChange={setTiktokAdPlacement} />;
+      case 'linkedin':
+        return <LinkedInAdEditor ad={linkedinAd} onChange={setLinkedinAd} placement={linkedinAdPlacement} onPlacementChange={setLinkedinAdPlacement} />;
       default:
         return null;
     }
@@ -133,16 +129,14 @@ function App() {
 
   const renderPreview = () => {
     switch (activeAdType) {
-      case 'search':
-        return <SearchAdPreview ad={searchAd} mode={previewMode} placement={searchAdPlacement} />;
-      case 'display':
-        return <DisplayAdPreview ad={displayAd} mode={previewMode} placement={displayAdPlacement} />;
-      case 'youtube':
-        return <YouTubeAdPreview ad={youtubeAd} mode={previewMode} placement={youtubeAdPlacement} />;
-      case 'discover':
-        return <DiscoverAdPreview ad={discoverAd} mode={previewMode} />;
-      case 'gmail':
-        return <GmailAdPreview ad={gmailAd} mode={previewMode} isOpen={gmailIsOpen} onOpenChange={setGmailIsOpen} />;
+      case 'facebook':
+        return <FacebookAdPreview ad={facebookAd} mode={previewMode} placement={facebookAdPlacement} />;
+      case 'instagram':
+        return <InstagramAdPreview ad={instagramAd} mode={previewMode} placement={instagramAdPlacement} />;
+      case 'tiktok':
+        return <TikTokAdPreview ad={tiktokAd} mode={previewMode} placement={tiktokAdPlacement} />;
+      case 'linkedin':
+        return <LinkedInAdPreview ad={linkedinAd} mode={previewMode} placement={linkedinAdPlacement} />;
       default:
         return null;
     }
@@ -150,13 +144,13 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header previewMode={previewMode} onPreviewModeChange={handlePreviewModeChange} />
+      <Header />
       
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AdTypeSelector activeType={activeAdType} onTypeChange={handleAdTypeChange} />
         <div className="flex gap-8">
           <div className="flex-shrink-0" style={{ flexBasis: '40%', maxWidth: '40%' }}>
-            <div className="bg-white shadow-sm rounded-lg p-6">
+            <div className="bg-white shadow-sm rounded-lg p-6 h-[730px] overflow-y-auto">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 {activeAdType.charAt(0).toUpperCase() + activeAdType.slice(1)} Ad Editor
               </h2>
@@ -164,19 +158,13 @@ function App() {
             </div>
           </div>
           <div className="flex-grow" style={{ flexBasis: '60%', maxWidth: '60%' }}>
-            <div className="bg-gray-100 rounded-lg p-6">
+            <div className="bg-gray-100 rounded-lg p-6 h-[730px]">
               <div className="mb-4">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">
                   Preview ({previewMode === 'desktop' ? 'Desktop' : 'Mobile'})
                 </h2>
-                <PreviewSelector 
-                  adType={activeAdType}
-                  activePreview={activePreview}
-                  onPreviewChange={setActivePreview}
-                  mode={previewMode}
-                />
               </div>
-              <div className="flex items-center justify-center min-h-96">
+              <div className="flex items-center justify-center h-[calc(730px-120px)]">
                 {renderPreview()}
               </div>
             </div>

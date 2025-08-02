@@ -1,67 +1,47 @@
-export interface AdAsset {
-  id: string;
-  type: 'image' | 'text' | 'headline' | 'description' | 'url';
-  content: string;
-  title?: string;
-}
-
-export interface SearchAd {
-  headline: string;
-  description: string;
-  displayUrl: string;
-  finalUrl: string;
-  sitelinks?: { text: string }[];
-  image?: string;
-}
-
-export interface DisplayAd {
+export interface FacebookAd {
   headline: string;
   description: string;
   image: string;
-  logo: string;
-  businessName: string;
-  finalUrl: string;
-  callToAction: string;
-  ctaType?: string;
-  showCTA?: boolean; // <-- Added for editor toggle
-}
-
-export interface YouTubeAd {
-  videoThumbnail: string;
-  headline: string;
-  description: string;
-  callToAction?: string | null;
-  finalUrl: string;
-  /** Optional business/brand name shown beneath headline */
-  businessName?: string;
-  /** Optional brand logo shown in ad details */
-  logo?: string;
-  /** Aspect ratio for video thumbnail */
-  thumbnailAspectRatio?: '16/9' | '1/1' | '4/5';
-}
-
-export interface DiscoverAd {
-  headline: string;
-  description: string;
-  image: string;
-  logo: string;
-  businessName: string;
-  finalUrl: string;
-  imageAspectRatio?: '16/9' | '1/1';
-}
-
-export interface GmailAd {
-  subject: string;
-  description: string;
-  image: string;
-  logo: string;
   businessName: string;
   finalUrl: string;
   callToAction?: string;
-  contentType?: 'description-cta' | 'image-card';
-  imageCardDescription?: string;
-  closedContentType?: 'subject-cta' | 'subject-description' | 'subject-image-card';
+  aspectRatio: '4:5' | '1.91:1' | '1:1';
+  mediaType: 'image' | 'video';
 }
 
-export type AdType = 'search' | 'display' | 'youtube' | 'discover' | 'gmail';
+export interface InstagramAd {
+  headline: string;
+  description: string;
+  image: string;
+  businessName: string;
+  finalUrl: string;
+  callToAction?: string;
+  aspectRatio: '1:1' | '4:5' | '9:16';
+  mediaType: 'image' | 'video';
+}
+
+export interface TikTokAd {
+  headline: string;
+  description: string;
+  video: string;
+  businessName: string;
+  finalUrl: string;
+  callToAction?: string;
+  videoLength: number; // in seconds
+}
+
+export interface LinkedInAd {
+  headline: string;
+  description: string;
+  image: string;
+  businessName: string;
+  finalUrl: string;
+  callToAction?: string;
+  aspectRatio: '1:1' | '4:5' | '2:3' | '1:1.91';
+  mediaType: 'image' | 'video';
+  carouselType?: 'single' | 'carousel';
+  carouselImages?: string[];
+}
+
+export type AdType = 'facebook' | 'instagram' | 'tiktok' | 'linkedin';
 export type PreviewMode = 'desktop' | 'mobile';
