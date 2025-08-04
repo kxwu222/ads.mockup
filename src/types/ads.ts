@@ -16,7 +16,7 @@ export interface InstagramAd {
   businessName: string;
   finalUrl: string;
   callToAction?: string;
-  aspectRatio: '1:1' | '4:5' | '9:16';
+  aspectRatio: '1:1' | '4:5' | '9:16' | '9:16-reel';
   mediaType: 'image' | 'video';
 }
 

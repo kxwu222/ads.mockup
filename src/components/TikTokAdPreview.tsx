@@ -50,7 +50,7 @@ const InteractionButtons = () => {
 const SponsoredContent = ({ ad, ctaColor }: { ad: TikTokAd; ctaColor: string }) => {
   const [showFullText, setShowFullText] = useState(false);
   
-  // Calculate if text should be truncated (approximately 4 lines at 12px font size)
+  // Calculate if text should be truncated (over 100 characters)
   const shouldTruncate = (text: string) => {
     return text.length > 100;
   };

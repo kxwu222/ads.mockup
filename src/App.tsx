@@ -40,7 +40,7 @@ function App() {
     mediaType: 'image',
   });
 
-  const [instagramAdPlacement, setInstagramAdPlacement] = useState<'1:1' | '4:5' | '9:16'>('4:5');
+  const [instagramAdPlacement, setInstagramAdPlacement] = useState<'1:1' | '4:5' | '9:16' | '9:16-reel'>('4:5');
 
   const [tiktokAd, setTiktokAd] = useState<TikTokAd>({
     headline: '',
@@ -151,7 +151,7 @@ function App() {
         <div className="flex gap-8">
           <div className="flex-shrink-0" style={{ flexBasis: '40%', maxWidth: '40%' }}>
             <div className="bg-white shadow-sm rounded-lg p-6 h-[730px] overflow-y-auto">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">
                 {activeAdType.charAt(0).toUpperCase() + activeAdType.slice(1)} Ad Editor
               </h2>
               {renderEditor()}
@@ -160,7 +160,7 @@ function App() {
           <div className="flex-grow" style={{ flexBasis: '60%', maxWidth: '60%' }}>
             <div className="bg-gray-100 rounded-lg p-6 h-[730px]">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">
                   Preview ({previewMode === 'desktop' ? 'Desktop' : 'Mobile'})
                 </h2>
               </div>

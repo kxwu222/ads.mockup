@@ -20,9 +20,9 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
           Aspect Ratio
         </label>
         <div className="flex space-x-4">
@@ -63,37 +63,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Media Type
-        </label>
-        <div className="flex space-x-4">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="mediaType"
-              value="image"
-              checked={ad.mediaType === 'image'}
-              onChange={(e) => handleChange('mediaType', e.target.value as 'image' | 'video')}
-              className="mr-2"
-            />
-            <span className="text-sm">Image</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="mediaType"
-              value="video"
-              checked={ad.mediaType === 'video'}
-              onChange={(e) => handleChange('mediaType', e.target.value as 'image' | 'video')}
-              className="mr-2"
-            />
-            <span className="text-sm">Video</span>
-          </label>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
           Text
         </label>
         <textarea
@@ -101,7 +71,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           onChange={(e) => handleChange('description', e.target.value)}
           rows={3}
           maxLength={125}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Enter your ad description"
         />
         <div className="text-xs text-gray-500 mt-1">
@@ -110,7 +80,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
           Headline
         </label>
         <input
@@ -118,7 +88,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           value={ad.headline}
           onChange={(e) => handleChange('headline', e.target.value)}
           maxLength={40}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Enter your headline"
         />
         <div className="text-xs text-gray-500 mt-1">
@@ -127,7 +97,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
           Username
         </label>
         <input
@@ -135,13 +105,13 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           value={ad.businessName}
           onChange={(e) => handleChange('businessName', e.target.value)}
           maxLength={125}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter business name"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          placeholder="Enter username"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
           Call to Action
         </label>
         <input
@@ -149,31 +119,32 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           value={ad.callToAction || ''}
           onChange={(e) => handleChange('callToAction', e.target.value)}
           maxLength={40}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Learn More"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
           Website text
         </label>
         <input
           type="url"
           value={ad.finalUrl}
           onChange={(e) => handleChange('finalUrl', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="www.example.com"
         />
       </div>
 
       <div>
         <ImageUploader
-          label={ad.mediaType === 'image' ? 'Image' : 'Video'}
+          label="Asset"
           value={ad.image}
           onChange={(image) => handleChange('image', image)}
           aspectRatio={placement}
-          allowVideo={ad.mediaType === 'video'}
+          allowVideo={true}
+          autoDetect={true}
         />
       </div>
     </div>
