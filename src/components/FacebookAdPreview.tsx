@@ -17,7 +17,7 @@ export const FacebookAdPreview: React.FC<FacebookAdPreviewProps> = ({
   // Adjust container width based on aspect ratio
   const getContainerWidth = () => {
     if (mode === 'mobile') {
-      return 'w-[280px]'; // Fixed 280px width for all ratios on mobile
+      return 'w-80'; // Fixed 320px width for all ratios on mobile
     } else {
       // Desktop - adjust based on aspect ratio
       if (placement === '4:5') {
@@ -57,7 +57,7 @@ export const FacebookAdPreview: React.FC<FacebookAdPreviewProps> = ({
           style={{ 
             aspectRatio: placement === '4:5' ? '4/5' : placement === '1:1' ? '1/1' : '1.91/1',
             maxHeight: mode === 'mobile' ? '400px' : '500px',
-            maxWidth: placement === '4:5' ? '280px' : 'auto'
+            maxWidth: mode === 'mobile' ? '320px' : 'auto'
           }}
         >
           {ad.image ? (

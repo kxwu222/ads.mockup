@@ -95,7 +95,7 @@ const LinkedInImageCarousel = ({ images, ad }: { images: string[]; ad: LinkedInA
     const handleScroll = () => {
       if (scrollContainerRef.current) {
         const scrollLeft = scrollContainerRef.current.scrollLeft;
-        const slideWidth = 280 + 10; // 280px width + 10px gap
+        const slideWidth = 280 + 10; // 320px width + 10px gap
         const newIndex = Math.round(scrollLeft / slideWidth);
         if (newIndex !== currentIndex && newIndex >= 0 && newIndex < images.length) {
           setCurrentIndex(newIndex);

@@ -18,7 +18,7 @@ export const InstagramAdPreview: React.FC<InstagramAdPreviewProps> = ({
   // Adjust container width based on aspect ratio
   const getContainerWidth = () => {
     if (mode === 'mobile') {
-      return 'w-[280px]'; // Fixed 280px width for all ratios on mobile
+      return 'w-80'; // Fixed 320px width for all ratios on mobile
     } else {
       // Desktop - adjust based on aspect ratio
       if (placement === '4:5') {
@@ -238,7 +238,7 @@ export const InstagramAdPreview: React.FC<InstagramAdPreviewProps> = ({
         <div className="relative z-10 flex-1 h-[450px]"></div>
 
         {/* Branding overlay - positioned at bottom */}
-        <div className="absolute bottom-[40px] left-0 right-0 z-20 px-2">
+        <div className="absolute bottom-[40px] left-0 right-0 z-20 px-3">
           <div className="flex items-center mb-1">
             <div className="w-6 h-6 bg-[#440099] rounded-full flex items-center justify-center mr-2">
               <img src={icon128} alt="Logo" className="w-6 h-6 rounded-full" />
@@ -266,20 +266,20 @@ export const InstagramAdPreview: React.FC<InstagramAdPreviewProps> = ({
             </div>
             
             {/* CTA Button - directly under CTA card content with no spacing */}
-            <button className="w-full bg-[#440099] text-white py-2 px-4 rounded-lg font-semibold text-[10px] flex justify-between items-center">
+            <button className="w-full bg-[#440099] text-white py-2 px-4 rounded-lg font-semibold text-[12px] flex justify-between items-center">
               Learn More
               <span>›</span>
             </button>
           </div>
           
-          <div className="text-white text-[10px] mt-2 mb-1 max-w-[90%]">
+          <div className="text-white text-[12px] mt-2 mb-1 max-w-[90%]">
             {ad.headline && ad.headline.length > 45 ? (
               <span>{ad.headline.substring(0, 45)}...</span>
             ) : (
               ad.headline || 'Caption here'
             )}
           </div>
-          <div className="text-white/80 text-[9px] mb-2">Sponsored</div>
+          <div className="text-white/80 text-[10px] mb-2">Sponsored</div>
         </div>
 
         {/* Right side engagement buttons - moved above bottom navigation */}
@@ -344,7 +344,7 @@ export const InstagramAdPreview: React.FC<InstagramAdPreviewProps> = ({
         className="w-full bg-gray-200 flex flex-col items-center justify-center text-gray-500"
         style={{ 
           aspectRatio: placement === '4:5' ? '4/5' : '1/1',
-          maxWidth: mode === 'mobile' ? '280px' : 'auto'
+          maxWidth: mode === 'mobile' ? '320px' : 'auto'
         }}
       >
         {ad.image ? (
