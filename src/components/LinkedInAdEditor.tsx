@@ -168,8 +168,8 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
           </label>
           <div className="flex gap-6 mb-3 text-xs">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-600">File: jpg, png, or gif (Max 5MB)</span>
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span className="text-gray-500">File: jpg, png, or gif (Max 5MB)</span>
             </div>
           </div>
           <ImageUploader
@@ -201,8 +201,8 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
           </div>
           <div className="flex gap-6 mb-3 text-xs">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-600">File: jpg or png (Max 10MB)</span>
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span className="text-gray-500">File: jpg or png (Max 10MB)</span>
             </div>
           </div>
           <div className="space-y-3">
