@@ -9,6 +9,7 @@ interface ImageUploaderProps {
   allowVideo?: boolean;
   autoDetect?: boolean; // New prop for auto-detection
   customPlaceholder?: string; // New prop for custom placeholder text
+  labelClassName?: string; // New prop for custom label styling
 }
 
 export const ImageUploader: React.FC<ImageUploaderProps> = ({ 
@@ -19,7 +20,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   isLogo = false,
   allowVideo = false,
   autoDetect = false, // Default to false for backward compatibility
-  customPlaceholder // Add customPlaceholder to props
+  customPlaceholder, // Add customPlaceholder to props
+  labelClassName // Add labelClassName to props
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -119,7 +121,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className={`block text-sm font-medium text-gray-700 mb-2 ${labelClassName || ''}`}>
         {label}
       </label>
       <div

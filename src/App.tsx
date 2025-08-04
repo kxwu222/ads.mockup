@@ -146,7 +146,7 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <AdTypeSelector activeType={activeAdType} onTypeChange={handleAdTypeChange} />
         <div className="flex gap-8">
           <div className="flex-shrink-0" style={{ flexBasis: '40%', maxWidth: '40%' }}>

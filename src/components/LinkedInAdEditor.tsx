@@ -61,7 +61,7 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
               onChange={(e) => handleChange('carouselType', e.target.value as 'single' | 'carousel')}
               className="mr-2"
             />
-            <span className="text-sm">Single Image/Video</span>
+            <span className="text-sm">Single Image</span>
           </label>
           <label className="flex items-center">
             <input
@@ -131,8 +131,8 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+      <div className="pb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-3">
           Call to Action
         </label>
         <input
@@ -140,8 +140,11 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
           value={ad.callToAction || ''}
           onChange={(e) => handleChange('callToAction', e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-          placeholder="Apply"
+          placeholder="e.g. Apply, Learn More, Subscribe, Sign Up, Attend, Join, etc."
         />
+        {/* <div className="text-xs text-gray-400 mt-2">
+            Most common CTA for Single Image Ads is "Apply", "Learn More", "Subscribe", "Download", "Sign Up", "Attend" and "Join".
+        </div> */}
       </div>
 
       {/* <div>
@@ -157,16 +160,26 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
         />
       </div> */}
 
-      {/* Single Image/Video Upload */}
+      {/* Single Image Upload */}
       {!isCarousel && (
         <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Asset
+          </label>
+          <div className="flex gap-6 mb-3 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-gray-600">File: jpg, png, or gif (Max 5MB)</span>
+            </div>
+          </div>
           <ImageUploader
-            label="Asset"
+            label=""
             value={ad.image}
+            customPlaceholder="Upload image"
             onChange={(image) => handleChange('image', image)}
             aspectRatio={placement}
-            allowVideo={true}
-            autoDetect={true}
+            allowVideo={false}
+            autoDetect={false}
           />
         </div>
       )}
@@ -183,12 +196,14 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
               onClick={addCarouselImage}
               className="text-sm text-blue-600 hover:text-blue-800"
             >
-              + Add more
+              + Add more (Max 10)
             </button>
           </div>
-          <div className="bg-blue-50 p-3 rounded-md mb-3">
-            <div className="text-xs text-gray-600">File Type: jpg or png up to 10MB</div>
-            <div className="text-xs text-gray-600 mt-1">Number of carousel cards: 2-10</div>
+          <div className="flex gap-6 mb-3 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-gray-600">File: jpg or png (Max 10MB)</span>
+            </div>
           </div>
           <div className="space-y-3">
             {/* First two images in two-column layout */}
@@ -202,6 +217,7 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
                     aspectRatio="1:1"
                     allowVideo={false}
                     autoDetect={false}
+                    labelClassName="text-xs"
                   />
                 </div>
               ))}
@@ -228,6 +244,7 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
                         aspectRatio="1:1"
                         allowVideo={false}
                         autoDetect={false}
+                        labelClassName="text-xs"
                       />
                     </div>
                     <div className="flex-1 relative">
@@ -239,6 +256,7 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
                           aspectRatio="1:1"
                           allowVideo={false}
                           autoDetect={false}
+                          labelClassName="text-xs"
                         />
                       ) : (
                         <div className="flex-1">

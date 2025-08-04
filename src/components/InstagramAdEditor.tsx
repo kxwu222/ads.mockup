@@ -38,23 +38,23 @@ export const InstagramAdEditor: React.FC<InstagramAdEditorProps> = ({
             <input
               type="radio"
               name="aspectRatio"
-              value="1:1"
-              checked={placement === '1:1'}
-              onChange={(e) => handlePlacementChange(e.target.value as '1:1' | '4:5' | '9:16' | '9:16-reel')}
-              className="mr-2"
-            />
-            <span className="text-sm">1:1</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="aspectRatio"
               value="4:5"
               checked={placement === '4:5'}
               onChange={(e) => handlePlacementChange(e.target.value as '1:1' | '4:5' | '9:16' | '9:16-reel')}
               className="mr-2"
             />
             <span className="text-sm">4:5</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="aspectRatio"
+              value="1:1"
+              checked={placement === '1:1'}
+              onChange={(e) => handlePlacementChange(e.target.value as '1:1' | '4:5' | '9:16' | '9:16-reel')}
+              className="mr-2"
+            />
+            <span className="text-sm">1:1</span>
           </label>
           <label className="flex items-center">
             <input

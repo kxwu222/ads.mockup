@@ -35,7 +35,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
               onChange={(e) => onPlacementChange(e.target.value as '4:5' | '1.91:1' | '1:1')}
               className="mr-2"
             />
-            <span className="text-sm">4:5 (Preferred)</span>
+            <span className="text-sm">4:5</span>
           </label>
           <label className="flex items-center">
             <input
@@ -46,7 +46,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
               onChange={(e) => onPlacementChange(e.target.value as '4:5' | '1.91:1' | '1:1')}
               className="mr-2"
             />
-            <span className="text-sm">1:1 (Square)</span>
+            <span className="text-sm">1:1</span>
           </label>
           <label className="flex items-center">
             <input
