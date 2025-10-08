@@ -162,9 +162,9 @@ const LinkedInImageCarousel = ({ images, ad }: { images: string[]; ad: LinkedInA
 
             {/* CTA Section for each card - adaptive width */}
             <div className="flex items-center justify-between p-3 border-t border-gray-100 bg-blue-50 min-h-[70px]">
-              <div className="text-sm font-medium flex-1 mr-2">{ad.headline || 'Your headline'}</div>
+              <div className="text-sm font-medium flex-1 mr-3">{ad.headline || 'Your headline'}</div>
               <button 
-                className={`border border-blue-500 text-blue-500 rounded-full px-4 py-1 text-sm font-medium flex-shrink-0 ${
+                className={`border border-blue-500 text-blue-500 rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap flex-shrink-0 ${
                   ad.finalUrl ? 'hover:border-black cursor-pointer' : 'cursor-default'
                 }`}
                 onClick={(e) => {
@@ -306,9 +306,9 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
       {/* CTA Banner for Single Image/Video */}
       {!showCarouselPreview && (
         <div className="flex items-center justify-between p-3 border-t border-gray-100 bg-blue-50">
-          <div className="text-sm font-medium">{ad.headline || 'Your headline'}</div>
+          <div className="text-sm font-medium flex-1 mr-3">{ad.headline || 'Your headline'}</div>
           <button 
-            className={`border border-blue-500 text-blue-500 rounded-full px-5 py-1 text-sm font-medium ${
+            className={`border border-blue-500 text-blue-500 rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap flex-shrink-0 ${
               ad.finalUrl ? 'hover:border-black cursor-pointer' : 'cursor-default'
             }`}
             onClick={(e) => {
