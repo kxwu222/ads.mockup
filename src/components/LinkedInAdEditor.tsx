@@ -61,7 +61,7 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
               onChange={(e) => handleChange('carouselType', e.target.value as 'single' | 'carousel')}
               className="mr-2"
             />
-            <span className="text-sm">Single Image</span>
+            <span className="text-sm">Single asset</span>
           </label>
           <label className="flex items-center">
             <input
@@ -76,6 +76,10 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
                 if (newCarouselType === 'carousel' && (!ad.carouselImages || ad.carouselImages.length < 2)) {
                   handleChange('carouselImages', ['', '']);
                 }
+                // Reset mediaType to image when switching to carousel (carousels only support images)
+                if (newCarouselType === 'carousel' && ad.mediaType === 'video') {
+                  handleChange('mediaType', 'image');
+                }
               }}
               className="mr-2"
             />
@@ -83,6 +87,39 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
           </label>
         </div>
       </div>
+
+      {/* Media Type - only show for single asset */}
+      {isSingleImage && (
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Media Type
+          </label>
+          <div className="flex space-x-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="mediaType"
+                value="image"
+                checked={ad.mediaType === 'image'}
+                onChange={(e) => handleChange('mediaType', e.target.value as 'image' | 'video')}
+                className="mr-2"
+              />
+              <span className="text-sm">Image</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="mediaType"
+                value="video"
+                checked={ad.mediaType === 'video'}
+                onChange={(e) => handleChange('mediaType', e.target.value as 'image' | 'video')}
+                className="mr-2"
+              />
+              <span className="text-sm">Video</span>
+            </label>
+          </div>
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -160,7 +197,7 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
         />
       </div> */}
 
-      {/* Single Image Upload */}
+      {/* Single Image/Video Upload */}
       {!isCarousel && (
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -169,16 +206,18 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
           <div className="flex gap-6 mb-3 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span className="text-gray-500">File: jpg, png, or gif (Max 5MB)</span>
+              <span className="text-gray-500">
+                {isVideo ? 'File: mp4, mov, avi (Max 10MB)' : 'File: jpg, png, or gif (Max 5MB)'}
+              </span>
             </div>
           </div>
           <ImageUploader
             label=""
             value={ad.image}
-            customPlaceholder="Upload image"
+            customPlaceholder={isVideo ? "Upload video" : "Upload image"}
             onChange={(image) => handleChange('image', image)}
             aspectRatio={placement}
-            allowVideo={false}
+            allowVideo={isVideo}
             autoDetect={false}
           />
         </div>
