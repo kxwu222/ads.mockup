@@ -29,6 +29,20 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     fileInputRef.current?.click();
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleClick();
+    }
+  };
+
+  const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleClick();
+    }
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -126,6 +140,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       </label>
       <div
         onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
         className={`
           relative 
           border-[3px] border-dashed 
@@ -137,6 +153,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           flex-shrink-0
         `}
         style={containerStyle}
+        role="button"
+        tabIndex={0}
+        aria-label={customPlaceholder ? customPlaceholder : (autoDetect ? 'Upload image or video' : (allowVideo ? 'Upload video' : 'Upload image'))}
       >
         {value ? (
           <>
