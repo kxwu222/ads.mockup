@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Header } from './components/Header';
+import { AdTypeSelector } from './components/AdTypeSelector';
 import { FacebookAdEditor } from './components/FacebookAdEditor';
 import { FacebookAdPreview } from './components/FacebookAdPreview';
 import { InstagramAdEditor } from './components/InstagramAdEditor';
@@ -25,7 +26,7 @@ function App() {
     headline: '',
     description: '',
     image: '',
-    businessName: '',
+    businessName: 'The University of Sheffield',
     finalUrl: '',
     callToAction: '',
     aspectRatio: '4:5',
@@ -38,7 +39,7 @@ function App() {
     headline: '',
     description: '',
     image: '',
-    businessName: '',
+    businessName: 'The University of Sheffield',
     finalUrl: '',
     callToAction: '',
     aspectRatio: '4:5',
@@ -51,7 +52,7 @@ function App() {
     headline: '',
     description: '',
     video: '',
-    businessName: '',
+    businessName: 'The University of Sheffield',
     finalUrl: '',
     callToAction: '',
     videoLength: 15,
@@ -63,7 +64,7 @@ function App() {
     headline: '',
     description: '',
     image: '',
-    businessName: '',
+    businessName: 'The University of Sheffield',
     finalUrl: '',
     callToAction: '',
     aspectRatio: '1:1',
@@ -471,7 +472,9 @@ function App() {
         onClose={() => setIsExporting(false)}
       />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 mx-4">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <AdTypeSelector activeType={activeAdType} onTypeChange={handleAdTypeChange} />
+
         <div className="flex gap-4">
           <div className="flex-grow" style={{ flexBasis: '50%', maxWidth: '50%' }}>
             <div className="bg-white shadow-sm rounded-lg px-14 py-6 h-[850px] overflow-y-auto">
