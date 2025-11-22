@@ -29,7 +29,8 @@ export const Header: React.FC<HeaderProps> = ({ activeType, onTypeChange, onExpo
             </h1>
           </div>
 
-          <div className="flex items-center space-x-3">
+          {/* Export button hidden for now */}
+          {/* <div className="flex items-center space-x-3">
             <div className="relative">
               <button
                 onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
@@ -65,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({ activeType, onTypeChange, onExpo
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </header>
