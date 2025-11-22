@@ -71,7 +71,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           onChange={(e) => handleChange('description', e.target.value)}
           rows={3}
           maxLength={125}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Enter your ad description"
         />
         <div className="text-xs text-gray-500 mt-1">
@@ -88,7 +88,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           value={ad.headline}
           onChange={(e) => handleChange('headline', e.target.value)}
           maxLength={40}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Enter your headline"
         />
         <div className="text-xs text-gray-500 mt-1">
@@ -105,7 +105,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           value={ad.businessName}
           onChange={(e) => handleChange('businessName', e.target.value)}
           maxLength={125}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Enter username"
         />
       </div>
@@ -119,7 +119,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           value={ad.callToAction || ''}
           onChange={(e) => handleChange('callToAction', e.target.value)}
           maxLength={40}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Learn More"
         />
       </div>
@@ -132,7 +132,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           type="url"
           value={ad.finalUrl}
           onChange={(e) => handleChange('finalUrl', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="www.example.com"
         />
       </div>

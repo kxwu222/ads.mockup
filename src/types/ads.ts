@@ -18,6 +18,7 @@ export interface InstagramAd {
   callToAction?: string;
   aspectRatio: '1:1' | '4:5' | '9:16' | '9:16-reel';
   mediaType: 'image' | 'video';
+  showCard?: boolean;
 }
 
 export interface TikTokAd {

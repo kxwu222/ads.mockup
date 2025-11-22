@@ -13,12 +13,11 @@ export const TikTokAdEditor: React.FC<TikTokAdEditorProps> = ({
   ad,
   onChange,
   placement,
-  onPlacementChange,
 }) => {
   const handleChange = (field: keyof TikTokAd, value: string | number) => {
     onChange({ ...ad, [field]: value });
   };
- 
+
   return (
     <div className="space-y-4">
       <div>
@@ -29,7 +28,7 @@ export const TikTokAdEditor: React.FC<TikTokAdEditorProps> = ({
           type="text"
           value={ad.headline}
           onChange={(e) => handleChange('headline', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Enter your username"
         />
       </div>
@@ -42,7 +41,7 @@ export const TikTokAdEditor: React.FC<TikTokAdEditorProps> = ({
           value={ad.description}
           onChange={(e) => handleChange('description', e.target.value)}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Enter your caption"
         />
         <div className="text-xs text-gray-400 mt-1">
@@ -58,7 +57,7 @@ export const TikTokAdEditor: React.FC<TikTokAdEditorProps> = ({
           type="text"
           value={ad.callToAction || ''}
           onChange={(e) => handleChange('callToAction', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Learn More"
         />
       </div>
@@ -81,15 +80,11 @@ export const TikTokAdEditor: React.FC<TikTokAdEditorProps> = ({
           label="Asset"
           value={ad.video}
           onChange={(video) => handleChange('video', video)}
-          aspectRatio="9:16"
+          aspectRatio={placement}
           allowVideo={true}
           autoDetect={true}
-          customPlaceholder="Upload video (9:16)"
+          customPlaceholder="Upload video (1:1, 4:5, 9:16)"
         />
-      </div>
-
-      <div className="text-xs text-gray-400 mt-2">
-        If using video, recommended duration is 9-15s
       </div>
     </div>
   );

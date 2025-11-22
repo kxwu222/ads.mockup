@@ -15,7 +15,7 @@ export const InstagramAdEditor: React.FC<InstagramAdEditorProps> = ({
   placement,
   onPlacementChange,
 }) => {
-  const handleChange = (field: keyof InstagramAd, value: string | number) => {
+  const handleChange = (field: keyof InstagramAd, value: string | number | boolean) => {
     onChange({ ...ad, [field]: value });
   };
 
@@ -90,8 +90,8 @@ export const InstagramAdEditor: React.FC<InstagramAdEditorProps> = ({
           onChange={(e) => handleChange('description', e.target.value)}
           rows={3}
           maxLength={125}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-          placeholder="Enter your CTA card text"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          placeholder="Enter your caption here"
         />
         <div className="text-xs text-gray-500 mt-1">
           {ad.description.length}/125 characters
@@ -106,26 +106,58 @@ export const InstagramAdEditor: React.FC<InstagramAdEditorProps> = ({
           type="text"
           value={ad.businessName}
           onChange={(e) => handleChange('businessName', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Enter your username"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Call to Action
+        </label>
+        <input
+          type="text"
+          value={ad.callToAction || ''}
+          onChange={(e) => handleChange('callToAction', e.target.value)}
+          className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          placeholder="Learn More"
         />
       </div>
 
       {placement === '9:16-reel' && (
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Caption
-          </label>
-          <input
-            type="text"
-            value={ad.headline}
-            onChange={(e) => handleChange('headline', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            placeholder="Enter your caption"
+          <div className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              id="showCard"
+              checked={ad.showCard || false}
+              onChange={(e) => {
+                // If checking, ensure we have a default value if empty? No, let user type.
+                handleChange('showCard', e.target.checked);
+              }}
+              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="showCard" className="text-sm font-semibold text-gray-700 select-none">
+              Show CTA Card
+            </label>
+          </div>
+
+          <div className={`transition-opacity duration-200 ${ad.showCard ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Card text
+            </label>
+            <input
+              type="text"
+              value={ad.headline}
+              onChange={(e) => handleChange('headline', e.target.value)}
+              disabled={!ad.showCard}
+              className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100"
+              placeholder="Enter your card text"
             // maxLength={45}
-          />
-          <div className="text-xs text-gray-500 mt-1">
-            Recommended max 45 characters
+            />
+            <div className="text-xs text-gray-500 mt-1">
+              Recommended max 45 characters
+            </div>
           </div>
         </div>
       )}
@@ -151,13 +183,9 @@ export const InstagramAdEditor: React.FC<InstagramAdEditorProps> = ({
           aspectRatio={placement}
           allowVideo={true}
           autoDetect={true}
-          customPlaceholder={placement === '9:16' || placement === '9:16-reel' ? "Upload video (9:16)" : undefined}
+          customPlaceholder={placement === '9:16' || placement === '9:16-reel' ? "Upload video (9:16, 4:5, 1:1)" : undefined}
         />
-        {(placement === '9:16' || placement === '9:16-reel') && (
-          <div className="text-xs text-gray-400 mt-2">
-            If using video, recommended duration is 9-15s
-          </div>
-        )}
+        {(placement === '9:16' || placement === '9:16-reel')}
       </div>
     </div>
   );

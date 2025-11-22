@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { Info } from 'lucide-react';
 
 interface ImageUploaderProps {
   label: string;
@@ -7,21 +8,21 @@ interface ImageUploaderProps {
   aspectRatio?: string;
   isLogo?: boolean;
   allowVideo?: boolean;
-  autoDetect?: boolean; // New prop for auto-detection
-  customPlaceholder?: string; // New prop for custom placeholder text
-  labelClassName?: string; // New prop for custom label styling
+  autoDetect?: boolean;
+  customPlaceholder?: string;
+  labelClassName?: string;
 }
 
-export const ImageUploader: React.FC<ImageUploaderProps> = ({ 
-  label, 
-  value, 
-  onChange, 
+export const ImageUploader: React.FC<ImageUploaderProps> = ({
+  label,
+  value,
+  onChange,
   aspectRatio,
   isLogo = false,
   allowVideo = false,
-  autoDetect = false, // Default to false for backward compatibility
-  customPlaceholder, // Add customPlaceholder to props
-  labelClassName // Add labelClassName to props
+  autoDetect = false,
+  customPlaceholder,
+  labelClassName
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,13 +47,12 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Auto-detection logic
       if (autoDetect) {
-        const isVideo = file.type.startsWith('video/') || 
-                       file.name.match(/\.(mp4|mov|avi|webm|mkv)$/i);
-        const isImage = file.type.startsWith('image/') || 
-                       file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-        
+        const isVideo = file.type.startsWith('video/') ||
+          file.name.match(/\.(mp4|mov|avi|webm|mkv)$/i);
+        const isImage = file.type.startsWith('image/') ||
+          file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
         if (!isVideo && !isImage) {
           alert('Please upload a valid image or video file.');
           return;
@@ -61,13 +61,49 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
       const reader = new FileReader();
       reader.onloadend = () => {
-        onChange(reader.result as string);
+        const result = reader.result as string;
+
+        // If it's an image, resize it
+        if (file.type.startsWith('image/')) {
+          const img = new Image();
+          img.src = result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const maxDim = 600; // Changed from 800 to 600
+
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              // Compress to JPEG 0.7
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // Changed from 0.8 to 0.7
+              onChange(compressedDataUrl);
+            } else {
+              onChange(result);
+            }
+          };
+        } else {
+          // For videos or other types, use as is (can't easily resize video in browser)
+          onChange(result);
+        }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // Convert aspect ratio format from "16/9" to "16:9" for display
   const displayRatio = aspectRatio?.replace('/', ':');
 
   const containerStyle = {
@@ -81,7 +117,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const renderPlaceholder = () => {
     let placeholderText = "Upload image";
-    
+
     if (customPlaceholder) {
       placeholderText = customPlaceholder;
     } else if (autoDetect) {
@@ -94,23 +130,22 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
     return (
       <div className="flex flex-col items-center justify-center text-gray-500 py-4 px-2">
-        <svg 
-          className="w-8 h-8 mb-2 text-gray-400" 
-          fill="none" 
-          viewBox="0 0 24 24" 
+        <svg
+          className="w-8 h-8 mb-2 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={1.5} 
-            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75v-2.25m-3-7.5L12 3m0 0L6 9m6-6v12" 
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75v-2.25m-3-7.5L12 3m0 0L6 9m6-6v12"
           />
         </svg>
         <span className="text-sm font-medium text-gray-600 mb-1">
           {placeholderText}
         </span>
-        {/* Remove suggested ratio for all except logo */}
         {isLogo && (
           <span className="text-xs text-gray-500">
             Suggested ratio {displayRatio}
@@ -120,7 +155,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     );
   };
 
-  // Determine accept attribute based on props
   const getAcceptAttribute = () => {
     if (autoDetect) {
       return 'image/*,video/*';
@@ -135,9 +169,20 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   return (
     <div>
-      <label className={`block text-sm font-medium text-gray-700 mb-2 ${labelClassName || ''}`}>
-        {label}
-      </label>
+      <div className="flex items-center mb-2">
+        <label className={`block text-sm font-medium text-gray-700 ${labelClassName || ''}`}>
+          {label}
+        </label>
+        {(allowVideo || autoDetect) && (
+          <div className="group relative ml-2">
+            <Info className="w-4 h-4 text-gray-400" />
+            <div className="absolute bottom-full left-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-max max-w-xs pointer-events-none z-10 shadow-lg">
+              If using video, recommended duration is 9-15s
+              <div className="absolute top-full left-1.5 border-4 border-transparent border-t-gray-900"></div>
+            </div>
+          </div>
+        )}
+      </div>
       <div
         onClick={handleClick}
         onKeyDown={handleKeyDown}
