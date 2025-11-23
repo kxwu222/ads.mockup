@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ activeType, onTypeChange, onExpo
   };
 
   return (
-    <header className="bg-gradient-to-br from-orange-50 via-white to-red-50 animate-gradient-xy shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-3">
@@ -29,12 +29,11 @@ export const Header: React.FC<HeaderProps> = ({ activeType, onTypeChange, onExpo
             </h1>
           </div>
 
-          {/* Export button hidden for now */}
-          {/* <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3">
             <div className="relative">
               <button
                 onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
-                className="flex items-center space-x-2 bg-orange-700 hover:bg-orange-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                className="flex items-center space-x-2 bg-[#440099] hover: text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
               >
                 <Download className="h-4 w-4" />
                 <span>Export</span>
@@ -66,7 +65,7 @@ export const Header: React.FC<HeaderProps> = ({ activeType, onTypeChange, onExpo
                 </div>
               )}
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
     </header>

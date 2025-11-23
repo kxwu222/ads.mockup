@@ -270,7 +270,7 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
       </div>
 
       {/* Content Area - Scrollable */}
-      <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col">
+      <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col" style={{ minHeight: 0 }}>
 
         {/* Ad Card */}
         <div className="bg-white mb-2 mt-2 shadow-sm">
@@ -308,6 +308,11 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
                 aspectRatio: ad.mediaType === 'video' ? '9/16' : (placement === '4:5' ? '4/5' : placement === '1:1' ? '1/1' : '1.91/1')
               }}
             >
+              {/* Export key-color background layer - behind media for video transparency */}
+              <div
+                className="absolute inset-0 z-0"
+                style={{ backgroundColor: 'rgb(1, 2, 3)' }}
+              />
               {staticImage ? (
                 <img
                   src={staticImage}
@@ -318,8 +323,8 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
                 ad.image.startsWith('data:video') || ad.mediaType === 'video' ? (
                   <video
                     src={ad.image}
-                    className="w-full h-full object-contain"
-                    style={{ backgroundColor: '#1C1E24', objectFit: 'contain' }}
+                    className="w-full h-full object-contain relative z-10"
+                    style={{ backgroundColor: 'rgb(1, 2, 3)', objectFit: 'contain' }}
                     crossOrigin="anonymous"
                     muted
                     loop

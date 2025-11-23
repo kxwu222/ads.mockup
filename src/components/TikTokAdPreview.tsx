@@ -393,6 +393,14 @@ export const TikTokAdPreview: React.FC<TikTokAdPreviewProps> = ({
 
         {/* Video Content */}
         <div className="relative w-full h-full">
+          {/* Special background layer used only to help video export.
+              We key out this exact color (rgb(1,2,3)) in the export overlay
+              so the underlying video shows through without affecting UI. */}
+          <div
+            className="absolute inset-0"
+            style={{ backgroundColor: 'rgb(1, 2, 3)' }}
+          />
+
           {staticImage ? (
             <img
               src={staticImage}

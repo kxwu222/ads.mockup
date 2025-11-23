@@ -147,13 +147,131 @@ function App() {
   const [exportStatus, setExportStatus] = useState<'idle' | 'recording' | 'processing' | 'completed' | 'error'>('idle');
   const [exportError, setExportError] = useState<string | undefined>(undefined);
 
+  const transcodeToMp4 = async (sourceBlob: Blob): Promise<Blob> => {
+    setExportStatus('processing');
+    // Nudge progress into the processing phase (recording phase generally covers 0–90%)
+    setExportProgress((prev) => (prev < 90 ? 90 : prev));
+
+    try {
+      // Dynamically import ffmpeg to avoid build-time issues
+      // Try the newer 0.12.x API first, fallback to older API if needed
+      let ffmpeg: any;
+      let fetchFile: any;
+      
+      try {
+        const ffmpegModule = await import('@ffmpeg/ffmpeg');
+        const utilModule = await import('@ffmpeg/util');
+        
+        // Check if it's the new API (FFmpeg class) or old API (createFFmpeg)
+        if (ffmpegModule.FFmpeg) {
+          // New API (0.12.x)
+          const { FFmpeg } = ffmpegModule;
+          fetchFile = utilModule.fetchFile;
+          ffmpeg = new FFmpeg();
+          
+          ffmpeg.on('log', ({ message }: { message: string }) => {
+            // Optional: log ffmpeg messages
+          });
+
+          if (!ffmpeg.loaded) {
+            await ffmpeg.load();
+          }
+
+          const inputName = 'input.webm';
+          const outputName = 'output.mp4';
+
+          await ffmpeg.writeFile(inputName, await fetchFile(sourceBlob));
+
+          // Try exec first, then spawn as fallback
+          try {
+            await ffmpeg.exec([
+              '-i', inputName,
+              '-c:v', 'libx264',
+              '-preset', 'medium',
+              '-crf', '23',
+              '-c:a', 'aac',
+              '-b:a', '128k',
+              '-movflags', 'faststart',
+              outputName
+            ]);
+          } catch (execError) {
+            // If exec doesn't work, try spawn
+            await ffmpeg.spawn([
+              '-i', inputName,
+              '-c:v', 'libx264',
+              '-preset', 'medium',
+              '-crf', '23',
+              '-c:a', 'aac',
+              '-b:a', '128k',
+              '-movflags', 'faststart',
+              outputName
+            ]);
+          }
+
+          const data = await ffmpeg.readFile(outputName);
+          await ffmpeg.deleteFile(inputName);
+          await ffmpeg.deleteFile(outputName);
+
+          setExportProgress(100);
+          return new Blob([data], { type: 'video/mp4' });
+        } else if ((ffmpegModule as any).createFFmpeg) {
+          // Old API (0.11.x and earlier)
+          const { createFFmpeg, fetchFile: oldFetchFile } = ffmpegModule as any;
+          fetchFile = oldFetchFile;
+          ffmpeg = createFFmpeg({ log: false });
+
+          if (!ffmpeg.isLoaded()) {
+            await ffmpeg.load();
+          }
+
+          const inputName = 'input.webm';
+          const outputName = 'output.mp4';
+
+          ffmpeg.FS('writeFile', inputName, await fetchFile(sourceBlob));
+
+          await ffmpeg.run(
+            '-i', inputName,
+            '-c:v', 'libx264',
+            '-preset', 'medium',
+            '-crf', '23',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            '-movflags', 'faststart',
+            outputName
+          );
+
+          const data = ffmpeg.FS('readFile', outputName);
+          ffmpeg.FS('unlink', inputName);
+          ffmpeg.FS('unlink', outputName);
+
+          setExportProgress(100);
+          return new Blob([data.buffer], { type: 'video/mp4' });
+        } else {
+          throw new Error('Unknown ffmpeg API version');
+        }
+      } catch (importError) {
+        console.error('Failed to import ffmpeg:', importError);
+        throw new Error('FFmpeg library not available');
+      }
+    } catch (error) {
+      console.error('ffmpeg transcoding error:', error);
+      setExportStatus('error');
+      setExportError('Failed to transcode video to MP4.');
+      throw error;
+    }
+  };
+
   const handleVideoExport = async () => {
     if (previewRef.current === null) {
       return;
     }
 
     const previewElement = previewRef.current;
-    const videoElement = previewElement.querySelector('video') as HTMLVideoElement;
+    // Find the actual preview component element (the mobile frame container)
+    // The previewRef is on a wrapper with scale-95 transform, but we need the actual preview component
+    // which has the mobile frame with aspectRatio and all the UI elements
+    const actualPreviewElement = previewElement.querySelector('[style*="aspectRatio"]') as HTMLElement || previewElement.firstElementChild as HTMLElement || previewElement;
+    const videoElement = actualPreviewElement.querySelector('video') as HTMLVideoElement;
 
     if (!videoElement) {
       alert('No video found in preview.');
@@ -175,11 +293,29 @@ function App() {
         });
       }
 
-      // Get video dimensions
-      const width = videoElement.videoWidth || 1080;
-      const height = videoElement.videoHeight || 1920;
+      // Get preview container dimensions (mobile frame) instead of video native dimensions
+      // Use the actual preview element, not the wrapper, to get correct dimensions
+      const containerRect = actualPreviewElement.getBoundingClientRect();
+      const baseWidth = Math.round(containerRect.width);
+      const baseHeight = Math.round(containerRect.height);
+      const width = baseWidth * 2; // 2x for high DPI
+      const height = baseHeight * 2; // 2x for high DPI
 
       if (width === 0 || height === 0) {
+        throw new Error('Container dimensions are invalid.');
+      }
+      
+      console.log('Preview element dimensions:', {
+        wrapper: { width: previewElement.getBoundingClientRect().width, height: previewElement.getBoundingClientRect().height },
+        actual: { width: baseWidth, height: baseHeight },
+        canvas: { width, height }
+      });
+
+      // Get video native dimensions for scaling
+      const videoWidth = videoElement.videoWidth || 1080;
+      const videoHeight = videoElement.videoHeight || 1920;
+      
+      if (videoWidth === 0 || videoHeight === 0) {
         throw new Error('Video dimensions are invalid.');
       }
 
@@ -187,9 +323,82 @@ function App() {
       // We use html-to-image to snapshot the preview container, but filter out the video element
       // and force a transparent background so we can layer it on top of the video canvas.
       console.log('Capturing UI overlay...');
-      const overlayDataUrl = await htmlToImage.toPng(previewElement, {
+      console.log('Container size:', { baseWidth, baseHeight, canvasWidth: width, canvasHeight: height });
+      
+      // Ensure any scrollable containers are scrolled to top before capture
+      // This prevents extra spacing from scroll position affecting the layout
+      const scrollableElements = previewElement.querySelectorAll('[class*="overflow"]');
+      scrollableElements.forEach((el) => {
+        if (el instanceof HTMLElement && (el.scrollTop > 0 || el.scrollLeft > 0)) {
+          el.scrollTop = 0;
+          el.scrollLeft = 0;
+        }
+      });
+      
+      // Force the actual preview container to maintain exact dimensions during capture
+      // We avoid forcing height to let aspect-ratio handle it, preventing
+      // potential conflicts that could push content down or off-screen
+      const originalStyle = actualPreviewElement.style.cssText;
+      const originalMargin = actualPreviewElement.style.margin;
+      const originalPadding = actualPreviewElement.style.padding;
+      const originalBoxSizing = actualPreviewElement.style.boxSizing;
+      
+      // Ensure box-sizing is content-box so width matches exactly
+      // This ensures percentage calculations use the full width we set
+      actualPreviewElement.style.boxSizing = 'content-box';
+      actualPreviewElement.style.width = `${baseWidth}px`;
+      // actualPreviewElement.style.height = `${baseHeight}px`; // Removing height force to fix "push down" issue
+      actualPreviewElement.style.flexShrink = '0';
+      actualPreviewElement.style.flexGrow = '0';
+      
+      // Remove border, margin, and padding during capture to ensure percentage-based positioning
+      // (like right: 2% for engagement buttons) calculates correctly
+      // These are just visual frames and don't need to be in the export
+      actualPreviewElement.style.borderWidth = '0';
+      actualPreviewElement.style.borderStyle = 'none';
+      actualPreviewElement.style.margin = '0';
+      actualPreviewElement.style.padding = '0';
+
+      // Identify elements that need to be transparent during export (video backgrounds)
+      // This allows us to capture semi-transparent overlays (gradients) correctly
+      const transparentElements = actualPreviewElement.querySelectorAll('[data-export-hide-bg="true"]');
+      const originalBackgrounds: { element: HTMLElement, bg: string }[] = [];
+      
+      transparentElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          originalBackgrounds.push({ element: el, bg: el.style.backgroundColor });
+          // Force transparent background
+          el.style.backgroundColor = 'transparent';
+          el.style.background = 'transparent'; // Clear background image/gradient if any on container
+        }
+      });
+      
+      // Longer delay to ensure styles are applied and layout is fully recalculated
+      // This is critical for percentage-based positioning to work correctly
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Suppress console errors for CSS security issues (they're warnings, not fatal)
+      const originalConsoleError = console.error;
+      const cssErrors: any[] = [];
+      console.error = (...args: any[]) => {
+        // Filter out CSS security errors - they're expected and non-fatal
+        if (args[0]?.includes?.('cssRules') || args[0]?.includes?.('CSSStyleSheet')) {
+          cssErrors.push(args);
+          return; // Suppress these specific errors
+        }
+        originalConsoleError.apply(console, args);
+      };
+      
+      let overlayDataUrl: string;
+      try {
+        // Use pixelRatio: 2 to match our 2x canvas scaling
+        // This ensures percentage-based positioning in Reel layout scales correctly
+        // html-to-image will capture at 2x the container's actual rendered size
+        // Important: Ensure the container maintains its aspect ratio during capture
+        // by using the exact dimensions from getBoundingClientRect
+        overlayDataUrl = await htmlToImage.toPng(actualPreviewElement, {
         quality: 1.0,
-        pixelRatio: 2,
+          pixelRatio: 2, // This produces an image that's 2x the container size
         backgroundColor: 'transparent',
         filter: (node) => {
           // Exclude the video element itself from the snapshot
@@ -201,8 +410,41 @@ function App() {
           backgroundColor: 'transparent',
           boxShadow: 'none', // Remove shadow if it interferes
           border: 'none',    // Remove border if it interferes
-        }
-      });
+            // Ensure width matches exactly for correct percentage calculations
+            width: `${baseWidth}px`,
+            boxSizing: 'content-box',
+            margin: '0',
+            padding: '0',
+          },
+          cacheBust: true,
+        });
+      } catch (error) {
+        console.error('Failed to capture overlay:', error);
+        // Create a blank overlay as fallback - video will still export
+        const blankCanvas = document.createElement('canvas');
+        blankCanvas.width = width;
+        blankCanvas.height = height;
+        overlayDataUrl = blankCanvas.toDataURL('image/png');
+      } finally {
+        // Restore original background colors for transparent elements
+        originalBackgrounds.forEach(({ element, bg }) => {
+          element.style.backgroundColor = bg;
+          element.style.background = ''; // Clear manual override
+        });
+
+        // Restore original container styles
+        actualPreviewElement.style.cssText = originalStyle;
+        // Explicitly restore margin, padding, and box-sizing if they were set
+        if (originalMargin) actualPreviewElement.style.margin = originalMargin;
+        if (originalPadding) actualPreviewElement.style.padding = originalPadding;
+        if (originalBoxSizing) actualPreviewElement.style.boxSizing = originalBoxSizing;
+        // Restore original console.error
+        console.error = originalConsoleError;
+      }
+      
+      if (cssErrors.length > 0) {
+        console.log(`Suppressed ${cssErrors.length} CSS security warnings (expected for external fonts)`);
+      }
 
       const overlayImage = new Image();
       await new Promise((resolve, reject) => {
@@ -210,7 +452,154 @@ function App() {
         overlayImage.onerror = reject;
         overlayImage.src = overlayDataUrl;
       });
-      console.log('UI overlay captured.');
+      
+      // Verify overlay dimensions match expected canvas size
+      // html-to-image with pixelRatio: 2 should produce 2x the container size
+      const overlayNaturalWidth = overlayImage.naturalWidth;
+      const overlayNaturalHeight = overlayImage.naturalHeight;
+      // Allow small tolerance for rounding differences (within 2 pixels)
+      const dimensionMatch = Math.abs(overlayNaturalWidth - width) <= 2 && Math.abs(overlayNaturalHeight - height) <= 2;
+      console.log('UI overlay captured.', {
+        overlaySize: `${overlayNaturalWidth}x${overlayNaturalHeight}`,
+        expectedSize: `${width}x${height}`,
+        containerSize: `${baseWidth}x${baseHeight}`,
+        matches: dimensionMatch,
+        actualScale: `${(overlayNaturalWidth / baseWidth).toFixed(2)}x`,
+        expectedScale: '2x'
+      });
+
+      if (!dimensionMatch) {
+        console.warn(`⚠️ Overlay dimensions (${overlayNaturalWidth}x${overlayNaturalHeight}) don't match canvas (${width}x${height}). This may cause element positioning issues in Reel layout.`);
+        console.warn(`   Container: ${baseWidth}x${baseHeight}, Overlay scale: ${(overlayNaturalWidth / baseWidth).toFixed(2)}x, Expected: 2x`);
+      }
+
+      // Post-process overlay to punch out pure black areas so the video shows through.
+      // Many previews use solid black as the media background, which would otherwise
+      // completely cover the video when we draw the overlay on top.
+      const overlayCanvas = document.createElement('canvas');
+      overlayCanvas.width = width;
+      overlayCanvas.height = height;
+      const overlayCtx = overlayCanvas.getContext('2d');
+      if (!overlayCtx) {
+        throw new Error('Failed to create overlay canvas context.');
+      }
+
+      // Draw overlay at exact canvas size (width x height)
+      // If overlay dimensions don't match, this will scale it, which may cause
+      // percentage-based positioning in Reel layout to appear slightly off
+      // This is necessary to maintain consistency with video drawing dimensions
+      overlayCtx.drawImage(overlayImage, 0, 0, width, height);
+      const overlayImageData = overlayCtx.getImageData(0, 0, width, height);
+      const data = overlayImageData.data;
+
+      // Make only our special near-black background color fully transparent so
+      // underlying video is visible. This preserves true black UI elements
+      // like icons and text outlines.
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+
+        // Our special background color is rgb(1, 2, 3)
+        if (a > 0 && r === 1 && g === 2 && b === 3) {
+          data[i + 3] = 0; // Set alpha to 0 (fully transparent)
+        }
+      }
+
+      overlayCtx.putImageData(overlayImageData, 0, 0);
+
+      const processedOverlayUrl = overlayCanvas.toDataURL('image/png');
+      const processedOverlay = new Image();
+      await new Promise((resolve, reject) => {
+        processedOverlay.onload = resolve;
+        processedOverlay.onerror = reject;
+        processedOverlay.src = processedOverlayUrl;
+      });
+
+      // For Instagram Stories (9:16), capture overlays for each CTA animation stage
+      let stageOverlays: HTMLImageElement[] = [processedOverlay]; // Default: single overlay
+      const isInstagramStories = activeAdType === 'instagram' && instagramAdPlacement === '9:16';
+      
+      if (isInstagramStories && instagramPreviewRef.current) {
+        console.log('Capturing Instagram Stories CTA animation stages...');
+        const stages = [0, 1, 2];
+        const stageImages: HTMLImageElement[] = [];
+        
+        for (const stage of stages) {
+          // Set the stage
+          instagramPreviewRef.current.setStage(stage);
+          // Wait for React to render the new stage
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Capture overlay for this stage
+          try {
+            const stageOverlayDataUrl = await htmlToImage.toPng(previewElement, {
+              quality: 1.0,
+              pixelRatio: 2,
+              backgroundColor: 'transparent',
+              filter: (node) => node.tagName !== 'VIDEO',
+              style: {
+                background: 'transparent',
+                backgroundColor: 'transparent',
+                boxShadow: 'none',
+                border: 'none',
+              },
+              cacheBust: true,
+            });
+            
+            // Process this stage overlay (punch out key-color)
+            const stageCanvas = document.createElement('canvas');
+            stageCanvas.width = width;
+            stageCanvas.height = height;
+            const stageCtx = stageCanvas.getContext('2d');
+            if (stageCtx) {
+              const stageImg = new Image();
+              await new Promise((resolve, reject) => {
+                stageImg.onload = resolve;
+                stageImg.onerror = reject;
+                stageImg.src = stageOverlayDataUrl;
+              });
+              
+              stageCtx.drawImage(stageImg, 0, 0, width, height);
+              const stageImageData = stageCtx.getImageData(0, 0, width, height);
+              const stageData = stageImageData.data;
+              
+              for (let i = 0; i < stageData.length; i += 4) {
+                const r = stageData[i];
+                const g = stageData[i + 1];
+                const b = stageData[i + 2];
+                const a = stageData[i + 3];
+                
+                if (a > 0 && r === 1 && g === 2 && b === 3) {
+                  stageData[i + 3] = 0;
+                }
+              }
+              
+              stageCtx.putImageData(stageImageData, 0, 0);
+              const processedStageUrl = stageCanvas.toDataURL('image/png');
+              const processedStageImg = new Image();
+              await new Promise((resolve, reject) => {
+                processedStageImg.onload = resolve;
+                processedStageImg.onerror = reject;
+                processedStageImg.src = processedStageUrl;
+              });
+              
+              stageImages.push(processedStageImg);
+            }
+          } catch (error) {
+            console.warn(`Failed to capture stage ${stage} overlay, using default:`, error);
+            stageImages.push(processedOverlay); // Fallback to default
+          }
+        }
+        
+        stageOverlays = stageImages;
+        console.log(`Captured ${stageOverlays.length} stage overlays for Instagram Stories animation`);
+        
+        // Reset to initial stage
+        instagramPreviewRef.current.setStage(instagramAd.showCard ? 2 : 1);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
 
       // Create canvas for recording
       const canvas = document.createElement('canvas');
@@ -257,7 +646,7 @@ function App() {
         }
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         console.log('Recording stopped, creating blob...');
         const blob = new Blob(chunks, { type: mimeType });
         console.log('Blob created:', blob.size, 'bytes');
@@ -268,16 +657,14 @@ function App() {
           return;
         }
 
-        setExportStatus('processing');
-        setExportProgress(100);
-
-        const extension = mimeType.includes('webm') ? 'webm' : 'mp4';
-        const timestamp = new Date().getTime();
-        const filename = `${activeAdType} -ad - preview - ${timestamp}.${extension} `;
-
         try {
-          // Always use manual download method
-          const url = URL.createObjectURL(blob);
+          // Transcode whatever the recorder produced into a true MP4 file
+          const mp4Blob = await transcodeToMp4(blob);
+
+          const timestamp = new Date().getTime();
+          const filename = `${activeAdType}-ad-preview-${timestamp}.mp4`;
+
+          const url = URL.createObjectURL(mp4Blob);
           const a = document.createElement('a');
           a.style.display = 'none';
           a.href = url;
@@ -293,38 +680,172 @@ function App() {
 
           setExportStatus('completed');
         } catch (error) {
-          console.error('Error downloading file:', error);
+          console.error('Error downloading MP4 file:', error);
+          if (!exportError) {
+            setExportError('Failed to export MP4 video.');
+          }
           setExportStatus('error');
-          setExportError('Failed to trigger download.');
         }
       };
 
       // Store original loop state and disable it for recording
       const originalLoop = videoElement.loop;
+      const originalMuted = videoElement.muted;
       videoElement.loop = false;
-
-      // Reset and play video from start
-      videoElement.currentTime = 0;
       videoElement.muted = true; // Mute to allow autoplay
 
-      // Handle play promise
-      const playPromise = videoElement.play();
-      if (playPromise !== undefined) {
-        await playPromise.catch((error) => {
-          console.error('Play failed:', error);
-          throw new Error('Failed to play video for recording');
+      // Reset and ensure video is ready
+      videoElement.currentTime = 0;
+      
+      // Wait for video to be ready to play
+      if (videoElement.readyState < 2) {
+        await new Promise((resolve, reject) => {
+          videoElement.oncanplay = resolve;
+          videoElement.onerror = reject;
+          setTimeout(() => reject(new Error('Video loading timeout')), 10000);
         });
       }
+
+      // Small delay to ensure video is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Handle play promise
+      try {
+        await videoElement.play();
+      } catch (error) {
+          console.error('Play failed:', error);
+          throw new Error('Failed to play video for recording');
+      }
+
+      // Wait a bit more to ensure video is actually playing
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Verify video is actually playing
+      if (videoElement.paused) {
+        console.warn('Video is paused, attempting to play again...');
+        await videoElement.play();
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      // Log video state for debugging
+      console.log('Video export state:', {
+        readyState: videoElement.readyState,
+        paused: videoElement.paused,
+        currentTime: videoElement.currentTime,
+        duration: videoElement.duration,
+        videoWidth: videoElement.videoWidth,
+        videoHeight: videoElement.videoHeight,
+        visible: videoElement.offsetWidth > 0 && videoElement.offsetHeight > 0
+      });
+
+      // Determine desired object-fit behavior based on platform + placement
+      const getVideoObjectFit = (): 'contain' | 'cover' => {
+        switch (activeAdType) {
+          case 'tiktok':
+            // TikTok feed: video should sit inside the phone frame with padding when 1:1
+            return 'contain';
+          case 'instagram':
+            // Instagram Stories: full-screen video (cover)
+            if (instagramAdPlacement === '9:16') return 'cover';
+            // Reels: video letterboxed within placement (contain)
+            if (instagramAdPlacement === '9:16-reel') return 'contain';
+            // Feed posts: image/video fills its media box (cover)
+            return 'cover';
+          case 'facebook':
+            // Facebook feed media fills its box
+            return 'cover';
+          case 'linkedin':
+            // LinkedIn uses object-contain for video (letterboxed/pillarboxed)
+            return 'contain';
+          default:
+            return 'contain';
+        }
+      };
+      
+      // Determine the specific area on the canvas where the video should be drawn
+      // Default is full canvas (0, 0, width, height)
+      const getVideoDrawArea = () => {
+        if (activeAdType === 'instagram' && instagramAdPlacement === '9:16-reel') {
+          // For Instagram Reels, video is placed between status bar and bottom UI
+          // Top: 4.19%, Height: 81.51% (matching Preview component)
+          return {
+            x: 0,
+            y: height * 0.0419,
+            w: width,
+            h: height * 0.8151
+          };
+        }
+        return { x: 0, y: 0, w: width, h: height };
+      };
+
+      const videoObjectFit = getVideoObjectFit();
+      const targetArea = getVideoDrawArea();
+
+      // Calculate video drawing dimensions once (outside the loop for performance)
+      // We calculate relative to the target area, not the full canvas
+      const targetAspect = targetArea.w / targetArea.h;
+      const videoAspect = videoWidth / videoHeight;
+      
+      let drawWidth = targetArea.w;
+      let drawHeight = targetArea.h;
+      let drawX = targetArea.x;
+      let drawY = targetArea.y;
+
+      if (videoObjectFit === 'contain') {
+        // Contain: entire video visible inside target area (letterbox / pillarbox)
+        if (videoAspect > targetAspect) {
+          // Video relatively wider → limit by width
+          drawWidth = targetArea.w;
+          drawHeight = targetArea.w / videoAspect;
+          drawX = targetArea.x;
+          drawY = targetArea.y + (targetArea.h - drawHeight) / 2;
+        } else {
+          // Video relatively taller → limit by height
+          drawHeight = targetArea.h;
+          drawWidth = targetArea.h * videoAspect;
+          drawY = targetArea.y;
+          drawX = targetArea.x + (targetArea.w - drawWidth) / 2;
+        }
+      } else {
+        // Cover: fill target area, cropping as needed
+        if (videoAspect > targetAspect) {
+          // Video relatively wider → limit by height, crop left/right
+          drawHeight = targetArea.h;
+          drawWidth = targetArea.h * videoAspect;
+          drawX = targetArea.x + (targetArea.w - drawWidth) / 2;
+          drawY = targetArea.y;
+        } else {
+          // Video relatively taller → limit by width, crop top/bottom
+          drawWidth = targetArea.w;
+          drawHeight = targetArea.w / videoAspect;
+          drawY = targetArea.y + (targetArea.h - drawHeight) / 2;
+          drawX = targetArea.x;
+        }
+      }
+
+      console.log('Video drawing config:', {
+        videoSize: `${videoWidth}x${videoHeight}`,
+        canvasSize: `${width}x${height}`,
+        drawSize: `${drawWidth}x${drawHeight}`,
+        drawPos: `${drawX},${drawY}`
+      });
 
       // Start recording
       mediaRecorder.start();
 
-      // Draw video frames to canvas
+      // Use fixed interval for consistent 30fps frame capture
+      const frameInterval = 1000 / 30; // ~33.33ms per frame
       let frameCount = 0;
-      const totalDuration = videoElement.duration || 15; // Estimate duration
-      const estimatedTotalFrames = totalDuration * 30;
+      const totalDuration = videoElement.duration || 15;
+      const estimatedTotalFrames = Math.ceil(totalDuration * 30);
 
       const drawFrame = () => {
+        // Check if video is ready to be drawn
+        if (videoElement.readyState < 2) {
+          setTimeout(drawFrame, frameInterval);
+          return;
+        }
+
         frameCount++;
 
         // Update progress
@@ -334,23 +855,67 @@ function App() {
         }
 
         // Stop conditions
-        if (videoElement.paused || videoElement.ended || frameCount > 3600) { // 2 min safety limit
+        if (videoElement.paused || videoElement.ended || frameCount > estimatedTotalFrames + 30) {
           if (mediaRecorder.state === 'recording') {
+            console.log(`Stopping recording: paused=${videoElement.paused}, ended=${videoElement.ended}, frames=${frameCount}`);
             mediaRecorder.stop();
           }
           return;
         }
 
-        // 1. Draw Video (Background)
-        ctx.drawImage(videoElement, 0, 0, width, height);
+        // Clear canvas with background color
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, width, height);
 
-        // 2. Draw Overlay (Foreground)
-        // We draw the static overlay image on top of the video frame
-        ctx.drawImage(overlayImage, 0, 0, width, height);
+        // 1. Draw Video (Background) - draw regardless of visibility checks
+        // The video element's internal state is what matters, not DOM visibility
+        try {
+          if (videoElement.readyState >= 2) {
+            // Always try to draw - don't check visibility, just draw it
+            ctx.drawImage(videoElement, drawX, drawY, drawWidth, drawHeight);
+            
+            // Log first few frames for debugging
+            if (frameCount <= 3) {
+              console.log(`Frame ${frameCount} drawn: readyState=${videoElement.readyState}, currentTime=${videoElement.currentTime.toFixed(3)}`);
+            }
+          } else if (frameCount === 1) {
+            console.warn(`Video not ready on first frame: readyState=${videoElement.readyState}`);
+          }
+        } catch (drawError) {
+          console.error(`Error drawing video frame ${frameCount}:`, drawError);
+        }
 
-        requestAnimationFrame(drawFrame);
+        // 2. Draw Overlay (Foreground) - this includes the mobile frame and all UI elements
+        // We use the processed overlay where pure black areas have been made transparent so
+        // the video content shows through.
+        // For Instagram Stories, switch overlay based on current time to show CTA animation
+        try {
+          let overlayToDraw = processedOverlay;
+          if (isInstagramStories && stageOverlays.length >= 3) {
+            const currentTime = videoElement.currentTime;
+            if (currentTime < 1.5) {
+              // Stage 0: Small white button (0-1.5s)
+              overlayToDraw = stageOverlays[0];
+            } else if (currentTime < 3.0) {
+              // Stage 1: Wide button (1.5-3s)
+              overlayToDraw = stageOverlays[1];
+            } else {
+              // Stage 2: CTA card (3s+), only if showCard is enabled
+              overlayToDraw = instagramAd.showCard ? stageOverlays[2] : stageOverlays[1];
+            }
+          }
+          ctx.drawImage(overlayToDraw, 0, 0, width, height);
+        } catch (overlayError) {
+          if (frameCount === 1) {
+            console.warn('Error drawing overlay:', overlayError);
+          }
+        }
+
+        // Schedule next frame with fixed interval
+        setTimeout(drawFrame, frameInterval);
       };
 
+      // Start drawing frames immediately
       drawFrame();
 
       // Stop recording when video ends
@@ -363,6 +928,7 @@ function App() {
       // Restore loop state when recording stops
       mediaRecorder.addEventListener('stop', () => {
         videoElement.loop = originalLoop;
+        videoElement.muted = originalMuted;
         if (originalLoop) {
           videoElement.play().catch(e => console.log('Resume play failed', e));
         }
@@ -416,7 +982,7 @@ function App() {
         ? await htmlToImage.toPng(previewElement, { cacheBust: true, pixelRatio: 2 })
         : await htmlToImage.toJpeg(previewElement, { cacheBust: true, pixelRatio: 2, quality: 0.95 });
 
-      saveAs(dataUrl, `${activeAdType} -ad - preview.${format} `);
+      saveAs(dataUrl, `${activeAdType}-ad-preview.${format}`);
     } catch (error) {
       console.error('Error exporting image:', error);
       alert('Failed to export image.');
@@ -461,7 +1027,7 @@ function App() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 animate-gradient-xy">
+    <div className="min-h-screen bg-[#C6BBFF]/5 shadow-sm">
       <Header activeType={activeAdType} onTypeChange={handleAdTypeChange} onExport={handleExport} hasVideo={hasVideo()} />
 
       <ExportProgressModal

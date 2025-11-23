@@ -13,6 +13,7 @@ interface InstagramAdPreviewProps {
 
 export interface InstagramAdPreviewRef {
   playAnimation: () => Promise<void>;
+  setStage: (stage: number) => void;
 }
 
 export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdPreviewProps>((
@@ -59,6 +60,9 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
         setStage(2);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Hold stage 2 for 2s
       }
+    },
+    setStage: (stage: number) => {
+      setStage(stage);
     },
   }));
 
@@ -337,6 +341,11 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
 
         {/* Video/Image Content Area - Full Screen */}
         <div className="absolute inset-0 bg-gray-900">
+          {/* Export key-color background layer - behind media for video transparency */}
+          <div
+            className="absolute inset-0 z-0"
+            style={{ backgroundColor: 'rgb(1, 2, 3)' }}
+          />
           {staticImage ? (
             <img
               src={staticImage}
@@ -344,18 +353,18 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
               className="w-full h-full object-cover"
             />
           ) : ad.image ? (
-            ad.image.startsWith('data:video') ? (
-              <video
-                ref={videoRef}
-                src={ad.image}
-                className="w-full h-full object-cover"
-                style={{ objectFit: 'cover' }}
-                crossOrigin="anonymous"
-                muted={isMuted}
-                loop
-                playsInline
-                autoPlay
-              />
+              ad.image.startsWith('data:video') ? (
+                <video
+                  ref={videoRef}
+                  src={ad.image}
+                  className="w-full h-full object-cover relative z-10"
+                  style={{ backgroundColor: 'rgb(1, 2, 3)', objectFit: 'cover' }}
+                  crossOrigin="anonymous"
+                  muted={isMuted}
+                  loop
+                  playsInline
+                  autoPlay
+                />
             ) : (
               <img
                 src={ad.image}
@@ -468,6 +477,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
     return (
       <div
         className={`${containerClass} mx-auto bg-black text-white overflow-hidden relative font-sans shadow-2xl border border-gray-200`}
+        data-export-hide-bg="true"
         style={{
           aspectRatio: '1179 / 2556',
         }}
@@ -475,7 +485,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
         {/* Status Bar (4.19%) */}
         <div
           className="absolute top-0 left-0 w-full flex items-center px-4 z-20"
-          style={{ height: '4.19%', backgroundColor: 'rgba(0,0,0,0.2)' }}
+          style={{ height: '4.19%', backgroundColor: '#000' }}
         >
           <div className="text-xs font-semibold">23:59</div>
         </div>
@@ -483,12 +493,15 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
         {/* Hidden canvas for color analysis */}
         <canvas ref={canvasRef} className="hidden" />
 
-        {/* Placement Area (81.87%) */}
+        {/* Placement Area - Media area positioned to end right above "Sponsored" text */}
+        {/* Sponsored tag is at bottom: 12.5% with height: 1.8%, so its top edge is at 85.7% from top */}
+        {/* Media area starts at 4.19%, so height should be 85.7% - 4.19% = 81.51% */}
         <div
-          className="absolute left-0 w-full overflow-hidden bg-gray-900"
+          className="absolute left-0 w-full overflow-hidden bg-gray-900 relative"
+          data-export-hide-bg="true"
           style={{
             top: '4.19%',
-            height: '81.87%',
+            height: '81.51%',
           }}
         >
           {staticImage ? (
@@ -502,7 +515,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
               <video
                 ref={videoRef}
                 src={ad.image}
-                className="w-full h-full object-contain bg-black"
+                className="w-full h-full object-contain relative z-10"
                 style={{ objectFit: 'contain' }}
                 crossOrigin="anonymous"
                 muted={isMuted}
@@ -524,7 +537,12 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
           )}
 
           {/* Top Overlay Gradient inside placement area */}
-          <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/40 to-transparent z-10 pointer-events-none"></div>
+          <div 
+            className="absolute top-0 left-0 w-full h-24 z-10 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent)'
+            }}
+          ></div>
         </div>
 
         {/* CTA Button (Bottom ~32%, Height 3.72%) - Top of Stack, Aligned with Comment Icon */}
@@ -627,7 +645,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
 
         {/* Icons Column (Right 0, Bottom 5.67%) */}
         <div
-          className="absolute z-30 flex flex-col items-center justify-end pb-4 gap-1"
+          className="absolute z-30 flex flex-col items-center justify-end pb-4 gap-3.5"
           style={{
             right: '2%',
             bottom: '9%',
@@ -637,16 +655,14 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
         >
           <div className="flex flex-col items-center">
             <HeartIcon size={24} className="text-white drop-shadow-md" strokeWidth={1.5} />
-            <span className="text-[10px] font-medium drop-shadow-md">419</span>
           </div>
           <div className="flex flex-col items-center">
             <MessageCircleIcon size={24} className="text-white drop-shadow-md" strokeWidth={1.5} />
-            <span className="text-[10px] font-medium drop-shadow-md">108</span>
           </div>
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center mr-1">
             <SendIcon size={24} className="text-white drop-shadow-md transform rotate-12" strokeWidth={1.5} />
           </div>
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center mr-1">
             <MoreHorizontalIcon size={24} className="text-white drop-shadow-md" strokeWidth={1.5} />
           </div>
         </div>
@@ -722,11 +738,16 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
 
           {/* Image Content */}
           <div
-            className="w-full bg-gray-100 flex flex-col items-center justify-center text-gray-500 overflow-hidden"
+            className="w-full bg-gray-100 flex flex-col items-center justify-center text-gray-500 overflow-hidden relative"
             style={{
               aspectRatio: placement === '4:5' ? '4/5' : '1/1',
             }}
           >
+            {/* Export key-color background layer - behind media for video transparency */}
+            <div
+              className="absolute inset-0 z-0"
+              style={{ backgroundColor: 'rgb(1, 2, 3)' }}
+            />
             {staticImage ? (
               <img
                 src={staticImage}
@@ -738,8 +759,8 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
                 <video
                   ref={videoRef}
                   src={ad.image}
-                  className="w-full h-full object-cover"
-                  style={{ objectFit: 'cover' }}
+                  className="w-full h-full object-cover relative z-10"
+                  style={{ backgroundColor: 'rgb(1, 2, 3)', objectFit: 'cover' }}
                   crossOrigin="anonymous"
                   muted
                   loop

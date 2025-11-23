@@ -26,7 +26,7 @@ export const ExportProgressModal: React.FC<ExportProgressModalProps> = ({
                 <div className="flex flex-col items-center text-center space-y-4">
 
                     {/* Icon State */}
-                    <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-50">
+                    <div className="w-16 h-16 flex items-center justify-center rounded-full">
                         {status === 'recording' || status === 'processing' ? (
                             <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
                         ) : status === 'completed' ? (
@@ -41,13 +41,13 @@ export const ExportProgressModal: React.FC<ExportProgressModalProps> = ({
                     {/* Title & Description */}
                     <div>
                         <h3 className="text-lg font-bold text-gray-900">
-                            {status === 'recording' && 'Recording Video...'}
+                            {status === 'recording' && 'Downloading Video...'}
                             {status === 'processing' && 'Processing...'}
                             {status === 'completed' && 'Export Ready!'}
                             {status === 'error' && 'Export Failed'}
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">
-                            {status === 'recording' && 'Please wait while we capture your ad preview.'}
+                            {status === 'recording' && 'Please wait while we download your ad preview.'}
                             {status === 'processing' && 'Preparing your file for download.'}
                             {status === 'completed' && 'Your video has been successfully exported.'}
                             {status === 'error' && (error || 'Something went wrong during export.')}
@@ -65,7 +65,7 @@ export const ExportProgressModal: React.FC<ExportProgressModalProps> = ({
                             </div>
                             <div className="flex justify-between text-xs text-gray-400">
                                 <span>{Math.round(progress)}%</span>
-                                <span>{status === 'recording' ? 'Recording' : 'Processing'}</span>
+                                <span>{status === 'recording' ? 'Downloading' : 'Processing'}</span>
                             </div>
                         </div>
                     )}

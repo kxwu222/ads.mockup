@@ -42,7 +42,6 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
   };
 
   const isSingleImage = ad.carouselType === 'single' || !ad.carouselType;
-  const isVideo = ad.mediaType === 'video';
   const isCarousel = ad.carouselType === 'carousel';
 
   return (
@@ -76,10 +75,6 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
                 if (newCarouselType === 'carousel' && (!ad.carouselImages || ad.carouselImages.length < 2)) {
                   handleChange('carouselImages', ['', '']);
                 }
-                // Reset mediaType to image when switching to carousel (carousels only support images)
-                if (newCarouselType === 'carousel' && ad.mediaType === 'video') {
-                  handleChange('mediaType', 'image');
-                }
               }}
               className="mr-2"
             />
@@ -87,83 +82,6 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
           </label>
         </div>
       </div>
-
-      {/* Media Type - only show for single asset */}
-      {isSingleImage && (
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Media Type
-          </label>
-          <div className="flex space-x-4">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="mediaType"
-                value="image"
-                checked={ad.mediaType === 'image'}
-                onChange={(e) => handleChange('mediaType', e.target.value as 'image' | 'video')}
-                className="mr-2"
-              />
-              <span className="text-sm">Image</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="mediaType"
-                value="video"
-                checked={ad.mediaType === 'video'}
-                onChange={(e) => handleChange('mediaType', e.target.value as 'image' | 'video')}
-                className="mr-2"
-              />
-              <span className="text-sm">Video</span>
-            </label>
-          </div>
-        </div>
-      )}
-
-      {/* Aspect Ratio Selector - only show for video */}
-      {isSingleImage && isVideo && (
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Video Aspect Ratio
-          </label>
-          <div className="flex space-x-4">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="videoAspectRatio"
-                value="2:3"
-                checked={placement === '2:3'}
-                onChange={() => onPlacementChange('2:3')}
-                className="mr-2"
-              />
-              <span className="text-sm">9:16</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="videoAspectRatio"
-                value="4:5"
-                checked={placement === '4:5'}
-                onChange={() => onPlacementChange('4:5')}
-                className="mr-2"
-              />
-              <span className="text-sm">4:5</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="videoAspectRatio"
-                value="1:1"
-                checked={placement === '1:1'}
-                onChange={() => onPlacementChange('1:1')}
-                className="mr-2"
-              />
-              <span className="text-sm">1:1</span>
-            </label>
-          </div>
-        </div>
-      )}
 
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -244,25 +162,13 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
       {/* Single Image/Video Upload */}
       {!isCarousel && (
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Asset
-          </label>
-          <div className="flex gap-6 mb-3 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span className="text-gray-500">
-                {isVideo ? 'File: mp4, mov, avi (Max 10MB)' : 'File: jpg, png, or gif (Max 5MB)'}
-              </span>
-            </div>
-          </div>
           <ImageUploader
-            label=""
+            label="Asset"
             value={ad.image}
-            customPlaceholder={isVideo ? "Upload video" : "Upload image"}
             onChange={(image) => handleChange('image', image)}
             aspectRatio={placement}
-            allowVideo={isVideo}
-            autoDetect={false}
+            allowVideo={true}
+            autoDetect={true}
           />
         </div>
       )}

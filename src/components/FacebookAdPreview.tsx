@@ -99,6 +99,11 @@ export const FacebookAdPreview: React.FC<FacebookAdPreviewProps> = ({
               aspectRatio: placement === '4:5' ? '4/5' : placement === '1:1' ? '1/1' : '1.91/1',
             }}
           >
+            {/* Export key-color background layer - behind media for video transparency */}
+            <div
+              className="absolute inset-0 z-0"
+              style={{ backgroundColor: 'rgb(1, 2, 3)' }}
+            />
             {staticImage ? (
               <img
                 src={staticImage}
@@ -109,8 +114,8 @@ export const FacebookAdPreview: React.FC<FacebookAdPreviewProps> = ({
               ad.image.startsWith('data:video') ? (
                 <video
                   src={ad.image}
-                  className="w-full h-full object-cover"
-                  style={{ objectFit: 'cover' }}
+                  className="w-full h-full object-cover relative z-10"
+                  style={{ backgroundColor: 'rgb(1, 2, 3)', objectFit: 'cover' }}
                   crossOrigin="anonymous"
                   muted
                   loop
