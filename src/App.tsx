@@ -661,7 +661,7 @@ function App() {
           // Transcode whatever the recorder produced into a true MP4 file
           const mp4Blob = await transcodeToMp4(blob);
 
-          const timestamp = new Date().getTime();
+        const timestamp = new Date().getTime();
           const filename = `${activeAdType}-ad-preview-${timestamp}.mp4`;
 
           const url = URL.createObjectURL(mp4Blob);
