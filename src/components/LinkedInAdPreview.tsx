@@ -277,8 +277,7 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
           {/* Post header */}
           <div className="flex items-center p-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white border border-gray-100">
-              {/* <img src={icon128} alt="Logo" className="w-full h-full object-cover" /> */}
-              <div className="w-full h-full bg-gray-200 object-cover" />
+              <img src={'/icon128.png'} alt="Logo" className="w-10 h-10 object-cover flex-shrink-0" />
             </div>
             <div className="ml-3">
               <div className="font-semibold text-sm text-gray-900">{ad.businessName || 'Username'}</div>

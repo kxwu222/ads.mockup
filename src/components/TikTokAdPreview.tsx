@@ -28,9 +28,8 @@ const TopNavigation = () => {
 const InteractionButtons = () => {
   return (
     <div className="absolute right-3 bottom-20 flex flex-col items-center space-y-4">
-      <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center">
-        {/* <img src={icon128} alt="Profile" className="w-6 h-6 rounded-full" /> */}
-        <div className="w-6 h-6 rounded-full bg-gray-600" />
+      <div className="w-8 h-8 rounded-full border-white flex items-center justify-center">
+        <img src={'/icon128.png'} alt="Profile" className="w-8 h-8 rounded-full flex-shrink-0" />
       </div>
       <div className="flex flex-col items-center">
         <Heart className="w-6 h-6 fill-white stroke-white" />

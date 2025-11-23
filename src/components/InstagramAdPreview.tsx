@@ -391,7 +391,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
           <div className="w-full px-3 py-4 flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-[#440099] rounded-full mr-2 flex items-center justify-center border border-white/20">
-                <div className="w-8 h-8 rounded-full bg-gray-200" />
+                <img src="/icon128.png" alt="Logo" className="w-8 h-8 rounded-full flex-shrink-0" />
               </div>
               <div>
                 <p className="text-sm font-semibold drop-shadow-md">{ad.businessName || 'username'}</p>
@@ -598,8 +598,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
           <div className="flex flex-col justify-center w-full h-full">
             <div className="flex items-center mb-2">
               <div className="w-8 h-8 bg-white rounded-full mr-1 overflow-hidden border border-white/20">
-                {/* <img src={icon128} alt="Logo" className="w-full h-full object-cover" /> */}
-                <div className="w-full h-full bg-gray-200 object-cover" />
+                <img src={'/icon128.png'} alt="Logo" className="w-8 h-8 object-cover flex-shrink-0" />
               </div>
               <span className="font-semibold text-xs text-white shadow-black drop-shadow-md">
                 {ad.businessName || 'username'}
@@ -710,8 +709,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
           {/* Header */}
           <div className="flex items-center p-3">
             <div className="w-8 h-8 rounded-full bg-[#440099] flex items-center justify-center mr-3">
-              {/* <img src={icon128} alt="Logo" className="w-8 h-8 rounded-full" /> */}
-              <div className="w-8 h-8 rounded-full bg-gray-200" />
+              <img src={'/icon128.png'} alt="Logo" className="w-8 h-8 rounded-full flex-shrink-0" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold leading-none">{ad.businessName || 'username'}</p>

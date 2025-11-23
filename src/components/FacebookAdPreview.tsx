@@ -73,8 +73,7 @@ export const FacebookAdPreview: React.FC<FacebookAdPreviewProps> = ({
         <div className="bg-white mb-2">
           {/* Facebook Header */}
           <div className="flex items-center p-3">
-            {/* <img src={icon128} alt="Logo" className="w-10 h-10 rounded-full bg-[#440099] border border-gray-100" /> */}
-            <div className="w-10 h-10 rounded-full bg-gray-200 border border-gray-100" />
+            <img src={'/icon128.png'} alt="Logo" className="w-10 h-10 rounded-full bg-[#440099] border border-gray-100 flex-shrink-0" />
             <div className="ml-2 flex-1">
               <div className="text-sm font-bold text-gray-900 leading-tight">{ad.businessName || 'username'}</div>
               <div className="text-xs text-gray-500 flex items-center mt-0.5">
