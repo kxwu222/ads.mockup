@@ -23,6 +23,10 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
     placement,
     staticImage,
   }, ref) => {
+  // Debug: Log when ad.image changes
+  useEffect(() => {
+    console.log('InstagramAdPreview: Received ad.image:', ad.image ? `Length: ${ad.image.length}, startsWith data:video: ${ad.image.startsWith('data:video')}` : 'empty');
+  }, [ad.image]);
   // Adjust container width based on aspect ratio
   // Determine container width based on placement
   const getContainerWidth = () => {
@@ -341,11 +345,13 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
 
         {/* Video/Image Content Area - Full Screen */}
         <div className="absolute inset-0 bg-gray-900">
-          {/* Export key-color background layer - behind media for video transparency */}
-          <div
-            className="absolute inset-0 z-0"
-            style={{ backgroundColor: 'rgb(1, 2, 3)' }}
-          />
+          {/* Export key-color background layer - behind media for video transparency (only show when there's media) */}
+          {(staticImage || ad.image) && (
+            <div
+              className="absolute inset-0 z-0"
+              style={{ backgroundColor: 'rgb(1, 2, 3)' }}
+            />
+          )}
           {staticImage ? (
             <img
               src={staticImage}
@@ -369,15 +375,17 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
               <img
                 src={ad.image}
                 alt="Ad"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover relative z-10"
               />
             )
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">
-              <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              <div className="text-xs font-medium">Ad video</div>
+            <div className="w-full h-full flex items-center justify-center relative z-10">
+              <div className="text-center text-gray-400">
+                <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                <div className="text-sm font-medium text-gray-600">Ad image/video</div>
+              </div>
             </div>
           )}
         </div>
@@ -399,8 +407,8 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
           </div>
           <div className="w-full px-3 py-4 flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-[#440099] rounded-full mr-2 flex items-center justify-center border border-white/20">
-                <img src="/icon128.png" alt="Logo" className="w-8 h-8 rounded-full flex-shrink-0" />
+              <div className="w-8 h-8 bg-gray-100 rounded-full mr-2 flex items-center justify-center border border-white/20">
+                <div className="w-8 h-8 rounded-full flex-shrink-0" />
               </div>
               <div>
                 <p className="text-sm font-semibold drop-shadow-md">{ad.businessName || 'username'}</p>
@@ -523,16 +531,23 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
                 playsInline
                 autoPlay
               />
-            ) : (
-              <img
-                src={ad.image}
-                alt="Ad"
-                className="w-full h-full object-contain bg-black"
-              />
-            )
+              ) : (
+                <img
+                  src={ad.image}
+                  alt="Ad"
+                  className="w-full h-full object-contain bg-black relative z-10"
+                />
+              )
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-500">
-              <p>Ad video</p>
+            <div className="w-full h-full flex items-center justify-center relative z-10">
+              <div className="text-center text-gray-400">
+                <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                <div className="text-sm font-medium text-gray-400">
+                  {ad.mediaType === 'video' ? 'Ad video' : 'Ad image'}
+                </div>
+              </div>
             </div>
           )}
 
@@ -573,7 +588,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
                   ) : (
                     <img
                       src={ad.image}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover relative z-10"
                       alt="Thumbnail"
                     />
                   )
@@ -616,7 +631,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
           <div className="flex flex-col justify-center w-full h-full">
             <div className="flex items-center mb-2">
               <div className="w-8 h-8 bg-white rounded-full mr-1 overflow-hidden border border-white/20">
-                <img src={'/icon128.png'} alt="Logo" className="w-8 h-8 object-cover flex-shrink-0" />
+                <div className="w-8 h-8 object-cover flex-shrink-0" />
               </div>
               <span className="font-semibold text-xs text-white shadow-black drop-shadow-md">
                 {ad.businessName || 'username'}
@@ -724,8 +739,8 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
         <div className="w-full pb-4">
           {/* Header */}
           <div className="flex items-center p-3">
-            <div className="w-8 h-8 rounded-full bg-[#440099] flex items-center justify-center mr-3">
-              <img src={'/icon128.png'} alt="Logo" className="w-8 h-8 rounded-full flex-shrink-0" />
+            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+              <div className="w-8 h-8 rounded-full flex-shrink-0" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold leading-none">{ad.businessName || 'username'}</p>
@@ -738,16 +753,18 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
 
           {/* Image Content */}
           <div
-            className="w-full bg-gray-100 flex flex-col items-center justify-center text-gray-500 overflow-hidden relative"
+            className="w-full bg-[#E5E7EB] flex flex-col items-center justify-center text-gray-500 overflow-hidden relative"
             style={{
               aspectRatio: placement === '4:5' ? '4/5' : '1/1',
             }}
           >
-            {/* Export key-color background layer - behind media for video transparency */}
-            <div
-              className="absolute inset-0 z-0"
-              style={{ backgroundColor: 'rgb(1, 2, 3)' }}
-            />
+            {/* Export key-color background layer - behind media for video transparency (only show when there's media) */}
+            {(staticImage || ad.image) && (
+              <div
+                className="absolute inset-0 z-0"
+                style={{ backgroundColor: 'rgb(1, 2, 3)' }}
+              />
+            )}
             {staticImage ? (
               <img
                 src={staticImage}
@@ -771,15 +788,17 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
                 <img
                   src={ad.image}
                   alt="Ad"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover relative z-10"
                 />
               )
             ) : (
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <svg className="w-10 h-10 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <div className="text-sm font-medium">Ad image/video</div>
+              <div className="w-full h-full flex items-center justify-center relative z-10">
+                <div className="text-center text-gray-400">
+                  <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                  <div className="text-sm font-medium text-gray-600">Ad image/video</div>
+                </div>
               </div>
             )}
           </div>

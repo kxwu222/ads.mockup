@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import icon128 from '../../icon128.png';
+import icon128 from '/icon128.png';
 import { AdType } from '../types/ads';
 import { Download, ChevronDown } from 'lucide-react';
 

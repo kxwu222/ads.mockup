@@ -638,7 +638,32 @@ export async function exportVideo(
     }
 
     const videoObjectFit = getVideoObjectFit(options.activeAdType, options.placement);
-    const targetArea = getVideoDrawArea(width, height, options.activeAdType, options.placement);
+
+    // Determine where on the canvas the video should be drawn
+    // For most placements we use a fixed area based on platform/placement.
+    // For LinkedIn single-asset, we instead match the on-screen video element
+    // position so the export is restricted to the actual media container and
+    // does not bleed into the surrounding UI (status bar, header, etc).
+    let targetArea: { x: number; y: number; w: number; h: number };
+
+    if (options.activeAdType === 'linkedin') {
+      const videoRect = videoElement.getBoundingClientRect();
+
+      // Compute the video element's position relative to the preview container
+      const relX = (videoRect.left - containerRect.left) / containerRect.width;
+      const relY = (videoRect.top - containerRect.top) / containerRect.height;
+      const relW = videoRect.width / containerRect.width;
+      const relH = videoRect.height / containerRect.height;
+
+      targetArea = {
+        x: Math.max(0, width * relX),
+        y: Math.max(0, height * relY),
+        w: Math.max(1, width * relW),
+        h: Math.max(1, height * relH),
+      };
+    } else {
+      targetArea = getVideoDrawArea(width, height, options.activeAdType, options.placement);
+    }
 
     // Calculate video drawing dimensions
     const targetAspect = targetArea.w / targetArea.h;

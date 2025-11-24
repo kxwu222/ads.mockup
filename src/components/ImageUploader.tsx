@@ -55,6 +55,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
         if (!isVideo && !isImage) {
           alert('Please upload a valid image or video file.');
+          // Reset file input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
           return;
         }
       }
@@ -62,10 +66,25 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
+        if (!result) {
+          console.error('Failed to read file');
+          // Reset file input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+          return;
+        }
 
         // If it's an image, resize it
         if (file.type.startsWith('image/')) {
           const img = new Image();
+          img.onerror = () => {
+            console.error('Failed to load image');
+            // Reset file input
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+            }
+          };
           img.src = result;
           img.onload = () => {
             const canvas = document.createElement('canvas');
@@ -90,14 +109,33 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               ctx.drawImage(img, 0, 0, width, height);
               // Compress to JPEG 0.7
               const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // Changed from 0.8 to 0.7
+              console.log('ImageUploader: Calling onChange with image data URL, length:', compressedDataUrl.length);
               onChange(compressedDataUrl);
             } else {
+              console.log('ImageUploader: Canvas context not available, using original result');
               onChange(result);
+            }
+            // Reset file input after successful upload
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
             }
           };
         } else {
           // For videos or other types, use as is (can't easily resize video in browser)
+          console.log('ImageUploader: Calling onChange with video data URL, length:', result.length);
           onChange(result);
+          // Reset file input after successful upload
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }
+      };
+      reader.onerror = () => {
+        console.error('Failed to read file');
+        alert('Failed to read file. Please try again.');
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
         }
       };
       reader.readAsDataURL(file);

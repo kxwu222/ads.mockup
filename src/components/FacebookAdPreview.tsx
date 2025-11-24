@@ -16,6 +16,10 @@ export const FacebookAdPreview: React.FC<FacebookAdPreviewProps> = ({
   placement,
   staticImage,
 }) => {
+  // Debug: Log when ad.image changes
+  React.useEffect(() => {
+    console.log('FacebookAdPreview: Received ad.image:', ad.image ? `Length: ${ad.image.length}, startsWith data:video: ${ad.image.startsWith('data:video')}` : 'empty');
+  }, [ad.image]);
   // Adjust container width based on aspect ratio
   const getContainerWidth = () => {
     if (mode === 'mobile') {
@@ -73,7 +77,7 @@ export const FacebookAdPreview: React.FC<FacebookAdPreviewProps> = ({
         <div className="bg-white mb-2">
           {/* Facebook Header */}
           <div className="flex items-center p-3">
-            <img src={'/icon128.png'} alt="Logo" className="w-10 h-10 rounded-full bg-[#440099] border border-gray-100 flex-shrink-0" />
+            <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-100 flex-shrink-0"></div>
             <div className="ml-2 flex-1">
               <div className="text-sm font-bold text-gray-900 leading-tight">{ad.businessName || 'username'}</div>
               <div className="text-xs text-gray-500 flex items-center mt-0.5">
@@ -94,16 +98,18 @@ export const FacebookAdPreview: React.FC<FacebookAdPreviewProps> = ({
 
           {/* Ad Image/Video */}
           <div
-            className="relative overflow-hidden bg-gray-100"
+            className="relative overflow-hidden bg-[#E5E7EB]"
             style={{
               aspectRatio: placement === '4:5' ? '4/5' : placement === '1:1' ? '1/1' : '1.91/1',
             }}
           >
-            {/* Export key-color background layer - behind media for video transparency */}
-            <div
-              className="absolute inset-0 z-0"
-              style={{ backgroundColor: 'rgb(1, 2, 3)' }}
-            />
+            {/* Export key-color background layer - behind media for video transparency (only show when there's media) */}
+            {(staticImage || ad.image) && (
+              <div
+                className="absolute inset-0 z-0"
+                style={{ backgroundColor: 'rgb(1, 2, 3)' }}
+              />
+            )}
             {staticImage ? (
               <img
                 src={staticImage}
@@ -126,19 +132,16 @@ export const FacebookAdPreview: React.FC<FacebookAdPreviewProps> = ({
                 <img
                   src={ad.image}
                   alt="Ad"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover relative z-10"
                 />
               )
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <svg className="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <div className="w-full h-full flex items-center justify-center relative z-10">
+                <div className="text-center text-gray-400">
+                  <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375.375 0 01.75 0z" />
                   </svg>
-                  <div className="text-sm font-medium">Ad image/video</div>
-                  <div className="text-xs text-gray-400">
-                    Use a {placement === '4:5' ? '4:5' : placement === '1:1' ? '1:1' : '1.91:1'} ratio
-                  </div>
+                  <div className="text-sm font-medium text-gray-600">Ad image/video</div>
                 </div>
               </div>
             )}

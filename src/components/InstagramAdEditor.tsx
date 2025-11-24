@@ -21,8 +21,8 @@ export const InstagramAdEditor: React.FC<InstagramAdEditorProps> = ({
 
   const handlePlacementChange = (newPlacement: '1:1' | '4:5' | '9:16' | '9:16-reel') => {
     onPlacementChange(newPlacement);
-    // Automatically set media type to video for stories and reels
-    if (newPlacement === '9:16' || newPlacement === '9:16-reel') {
+    // Automatically set media type to video for reels only (stories accept both)
+    if (newPlacement === '9:16-reel') {
       handleChange('mediaType', 'video');
     }
   };
@@ -179,11 +179,21 @@ export const InstagramAdEditor: React.FC<InstagramAdEditorProps> = ({
         <ImageUploader
           label="Asset"
           value={ad.image}
-          onChange={(image) => handleChange('image', image)}
+          onChange={(image) => {
+            // Update both image and mediaType in a single state update
+            const isVideo = image.startsWith('data:video');
+            const newAd = { ...ad, image, mediaType: (isVideo ? 'video' : 'image') as 'image' | 'video' };
+            console.log('InstagramAdEditor: Updating ad state with image, hasImage:', !!newAd.image, 'isVideo:', isVideo);
+            onChange(newAd);
+          }}
           aspectRatio={placement}
           allowVideo={true}
           autoDetect={true}
-          customPlaceholder={placement === '9:16' || placement === '9:16-reel' ? "Upload video (9:16, 4:5, 1:1)" : undefined}
+          customPlaceholder={
+            placement === '9:16' ? "Upload image or video" :
+            placement === '9:16-reel' ? "Video in 9:16, 4:5, 1:1" :
+            undefined
+          }
         />
         {(placement === '9:16' || placement === '9:16-reel')}
       </div>

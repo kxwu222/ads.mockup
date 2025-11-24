@@ -240,7 +240,7 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
     >
       {/* Status Bar (4.19%) */}
       <div
-        className="w-full flex items-center px-6 z-20 flex-shrink-0 bg-white"
+        className="w-full flex items-center px-6 z-30 flex-shrink-0 bg-white relative"
         style={{ height: '4.19%' }}
       >
         <div className="text-sm font-semibold">23:59</div>
@@ -253,10 +253,9 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
       </div>
 
       {/* LinkedIn App Header */}
-      <div className="w-full h-10 flex items-center justify-between px-4 bg-white flex-shrink-0">
+      <div className="w-full h-10 flex items-center justify-between px-4 bg-white flex-shrink-0 relative z-30">
         <div className="w-5 h-5 rounded-full overflow-hidden bg-gray-200">
           {/* <img src={icon128} alt="Profile" className="w-full h-full object-cover" /> */}
-          <div className="w-full h-full bg-gray-200 object-cover" />
         </div>
         <div className="flex-1 mx-4 relative">
           <div className="bg-[#EEF3F8] h-6 rounded-md flex items-center px-3">
@@ -273,11 +272,10 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
       <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col" style={{ minHeight: 0 }}>
 
         {/* Ad Card */}
-        <div className="bg-white mb-2 mt-2 shadow-sm">
+        <div className="bg-white mb-2 shadow-sm relative z-20">
           {/* Post header */}
-          <div className="flex items-center p-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white border border-gray-100">
-              <img src={'/icon128.png'} alt="Logo" className="w-10 h-10 object-cover flex-shrink-0" />
+          <div className="flex items-center p-3 relative z-20">
+            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-100">
             </div>
             <div className="ml-3">
               <div className="font-semibold text-sm text-gray-900">{ad.businessName || 'Username'}</div>
@@ -304,26 +302,31 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
           ) : (
             <div
               className="w-full bg-[#E5E7EB] flex flex-col items-center justify-center relative overflow-hidden"
+              data-export-hide-bg="true"
               style={{
-                aspectRatio: ad.mediaType === 'video' ? '9/16' : (placement === '4:5' ? '4/5' : placement === '1:1' ? '1/1' : '1.91/1')
+                aspectRatio: ad.mediaType === 'video' ? '9/16' : (placement === '4:5' ? '4/5' : placement === '1:1' ? '1/1' : '1.91/1'),
+                isolation: 'isolate',
+                zIndex: 1
               }}
             >
-              {/* Export key-color background layer - behind media for video transparency */}
-              <div
-                className="absolute inset-0 z-0"
-                style={{ backgroundColor: 'rgb(1, 2, 3)' }}
-              />
+              {/* Export key-color background layer - behind media for video transparency (only show when there's media) */}
+              {(staticImage || ad.image) && (
+                <div
+                  className="absolute inset-0 z-0"
+                  style={{ backgroundColor: 'rgb(1, 2, 3)' }}
+                />
+              )}
               {staticImage ? (
                 <img
                   src={staticImage}
                   alt="Ad Export"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover relative z-10"
                 />
               ) : ad.image ? (
                 ad.image.startsWith('data:video') || ad.mediaType === 'video' ? (
                   <video
                     src={ad.image}
-                    className="w-full h-full object-contain relative z-10"
+                    className="w-full h-full object-contain absolute inset-0 z-10"
                     style={{ backgroundColor: 'rgb(1, 2, 3)', objectFit: 'contain' }}
                     crossOrigin="anonymous"
                     muted
@@ -335,19 +338,19 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
                   <img
                     src={ad.image}
                     alt="Ad"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover relative z-10"
                   />
                 )
               ) : (
-                <div className="text-center text-gray-400">
-                  <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                  </svg>
-                  <div className="text-sm font-medium text-gray-600">
-                    {ad.mediaType === 'video' ? 'Ad video' : 'Ad image'}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {ad.mediaType === 'video' ? 'Use a 9:16 ratio' : `Use a ${placement} ratio`}
+                <div className="w-full h-full flex items-center justify-center relative z-10">
+                  <div className="text-center text-gray-400">
+                    <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                    <div className="text-sm font-medium text-gray-600">Ad image</div>
+                    <div className="text-xs text-gray-500">
+                      Use a 1:1 or 3:4 ratio
+                    </div>
                   </div>
                 </div>
               )}
@@ -356,7 +359,7 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
 
           {/* CTA Banner for Single Image/Video */}
           {!showCarouselPreview && (
-            <div className="flex items-center justify-between p-3 border-t border-gray-100 bg-[#F3F6F8]">
+            <div className="flex items-center justify-between p-3 border-t border-gray-100 bg-[#F3F6F8] relative z-20">
               <div className="text-sm font-semibold text-gray-900 flex-1 mr-3">{ad.headline || 'Your headline'}</div>
               <button
                 className={`border border-gray-600 text-gray-600 rounded-full px-4 py-1 text-sm font-semibold whitespace-nowrap flex-shrink-0 hover:border-black hover:bg-gray-100 transition-colors ${ad.finalUrl ? 'cursor-pointer' : 'cursor-default'
@@ -416,7 +419,7 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
       </div>
 
       {/* LinkedIn Bottom Navigation */}
-      <div className="w-full h-12 bg-white border-t border-gray-200 flex items-center justify-around flex-shrink-0 pb-1">
+      <div className="w-full h-12 bg-white border-t border-gray-200 flex items-center justify-around flex-shrink-0 pb-1 relative z-30">
         <div className="flex flex-col items-center justify-center w-16">
           <Home className="w-5 h-5 text-gray-900" />
           <span className="text-[9px] text-gray-900 mt-0.5">Home</span>

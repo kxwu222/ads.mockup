@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
-import { AdTypeSelector } from './components/AdTypeSelector';
 import { FacebookAdEditor } from './components/FacebookAdEditor';
 import { FacebookAdPreview } from './components/FacebookAdPreview';
 import { InstagramAdEditor } from './components/InstagramAdEditor';
@@ -13,9 +12,12 @@ import { AdType, FacebookAd, InstagramAd, TikTokAd, LinkedInAd, PreviewMode } fr
 import * as htmlToImage from 'html-to-image';
 import { saveAs } from 'file-saver';
 import { ExportProgressModal } from './components/ExportProgressModal';
+import { ToastContainer } from './components/Toast';
+import { useToast } from './contexts/ToastContext';
 
 
 function App() {
+  const { toasts, removeToast } = useToast();
   const [activeAdType, setActiveAdType] = useState<AdType>('facebook');
   const [previewMode, setPreviewMode] = useState<PreviewMode>('mobile');
   const [activePreview, setActivePreview] = useState('feed');
@@ -26,7 +28,7 @@ function App() {
     headline: '',
     description: '',
     image: '',
-    businessName: 'The University of Sheffield',
+    businessName: '',
     finalUrl: '',
     callToAction: '',
     aspectRatio: '4:5',
@@ -39,7 +41,7 @@ function App() {
     headline: '',
     description: '',
     image: '',
-    businessName: 'The University of Sheffield',
+    businessName: 'username',
     finalUrl: '',
     callToAction: '',
     aspectRatio: '4:5',
@@ -52,7 +54,7 @@ function App() {
     headline: '',
     description: '',
     video: '',
-    businessName: 'The University of Sheffield',
+    businessName: 'username',
     finalUrl: '',
     callToAction: '',
     videoLength: 15,
@@ -64,7 +66,7 @@ function App() {
     headline: '',
     description: '',
     image: '',
-    businessName: 'The University of Sheffield',
+    businessName: 'username',
     finalUrl: '',
     callToAction: '',
     aspectRatio: '1:1',
@@ -117,6 +119,19 @@ function App() {
       setLinkedinAdPlacement('1:1');
     }
   };
+
+  // Debug: Log state changes to verify updates
+  useEffect(() => {
+    console.log('App: facebookAd.image changed:', facebookAd.image ? `Length: ${facebookAd.image.length}` : 'empty');
+  }, [facebookAd.image]);
+
+  useEffect(() => {
+    console.log('App: instagramAd.image changed:', instagramAd.image ? `Length: ${instagramAd.image.length}` : 'empty');
+  }, [instagramAd.image]);
+
+  useEffect(() => {
+    console.log('App: linkedinAd.image changed:', linkedinAd.image ? `Length: ${linkedinAd.image.length}` : 'empty');
+  }, [linkedinAd.image]);
 
   // Load state from URL hash on mount
   // Load state from URL hash on mount
@@ -765,6 +780,7 @@ function App() {
       // Determine the specific area on the canvas where the video should be drawn
       // Default is full canvas (0, 0, width, height)
       const getVideoDrawArea = () => {
+        // Special handling for Instagram Reels (9:16-reel)
         if (activeAdType === 'instagram' && instagramAdPlacement === '9:16-reel') {
           // For Instagram Reels, video is placed between status bar and bottom UI
           // Top: 4.19%, Height: 81.51% (matching Preview component)
@@ -775,6 +791,38 @@ function App() {
             h: height * 0.8151
           };
         }
+
+        // Special handling for LinkedIn single-asset:
+        // we want the exported video to be restricted to the actual media
+        // container, not the entire phone frame. So we compute the draw area
+        // from the <video> element's position relative to the preview frame.
+        if (activeAdType === 'linkedin') {
+          const videoRect = videoElement.getBoundingClientRect();
+
+          // If layout info is unavailable, fall back to full canvas.
+          if (
+            !videoRect.width ||
+            !videoRect.height ||
+            !containerRect.width ||
+            !containerRect.height
+          ) {
+            return { x: 0, y: 0, w: width, h: height };
+          }
+
+          const relX = (videoRect.left - containerRect.left) / containerRect.width;
+          const relY = (videoRect.top - containerRect.top) / containerRect.height;
+          const relW = videoRect.width / containerRect.width;
+          const relH = videoRect.height / containerRect.height;
+
+          return {
+            x: Math.max(0, width * relX),
+            y: Math.max(0, height * relY),
+            w: Math.max(1, width * relW),
+            h: Math.max(1, height * relH),
+          };
+        }
+
+        // Default: use the full canvas
         return { x: 0, y: 0, w: width, h: height };
       };
 
@@ -1010,15 +1058,18 @@ function App() {
     // Pass tempExportImage as a special prop to override video rendering during export
     const exportProps = tempExportImage ? { staticImage: tempExportImage } : {};
 
+    // Create keys based on image presence and a hash to force re-render when image changes
+    const getImageKey = (image: string) => image ? image.substring(0, 50) : 'empty';
+
     switch (activeAdType) {
       case 'facebook':
-        return <FacebookAdPreview ad={facebookAd} mode={previewMode} placement={facebookAdPlacement} {...exportProps} />;
+        return <FacebookAdPreview key={`facebook-${getImageKey(facebookAd.image)}`} ad={facebookAd} mode={previewMode} placement={facebookAdPlacement} {...exportProps} />;
       case 'instagram':
-        return <InstagramAdPreview ref={instagramPreviewRef} ad={instagramAd} mode={previewMode} placement={instagramAdPlacement} {...exportProps} />;
+        return <InstagramAdPreview key={`instagram-${getImageKey(instagramAd.image)}`} ref={instagramPreviewRef} ad={instagramAd} mode={previewMode} placement={instagramAdPlacement} {...exportProps} />;
       case 'tiktok':
-        return <TikTokAdPreview ad={tiktokAd} mode={previewMode} placement={tiktokAdPlacement} {...exportProps} />;
+        return <TikTokAdPreview key={`tiktok-${getImageKey(tiktokAd.video)}`} ad={tiktokAd} mode={previewMode} placement={tiktokAdPlacement} {...exportProps} />;
       case 'linkedin':
-        return <LinkedInAdPreview ad={linkedinAd} mode={previewMode} placement={linkedinAdPlacement} {...exportProps} />;
+        return <LinkedInAdPreview key={`linkedin-${getImageKey(linkedinAd.image)}`} ad={linkedinAd} mode={previewMode} placement={linkedinAdPlacement} {...exportProps} />;
       default:
         return null;
     }
@@ -1027,7 +1078,7 @@ function App() {
 
 
   return (
-    <div className="min-h-screen bg-[#C6BBFF]/5 shadow-sm">
+    <div className="min-h-screen bg-[#ffd7b5]/10 shadow-sm">
       <Header activeType={activeAdType} onTypeChange={handleAdTypeChange} onExport={handleExport} hasVideo={hasVideo()} />
 
       <ExportProgressModal
@@ -1038,9 +1089,9 @@ function App() {
         onClose={() => setIsExporting(false)}
       />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <AdTypeSelector activeType={activeAdType} onTypeChange={handleAdTypeChange} />
+      <ToastContainer toasts={toasts} onClose={removeToast} />
 
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex gap-4">
           <div className="flex-grow" style={{ flexBasis: '50%', maxWidth: '50%' }}>
             <div className="bg-white shadow-sm rounded-lg px-14 py-6 h-[850px] overflow-y-auto">
@@ -1051,7 +1102,7 @@ function App() {
             </div>
           </div>
           <div className="flex-shrink-0" style={{ flexBasis: '50%', maxWidth: '50%' }}>
-            <div className="bg-gray-100 rounded-lg p-6 h-[850px]">
+            <div className="bg-gray-100 rounded-lg shadow-sm p-6 h-[850px]">
               <div className="mb-4">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
                   Preview

@@ -83,7 +83,7 @@ export const TikTokAdEditor: React.FC<TikTokAdEditorProps> = ({
           aspectRatio={placement}
           allowVideo={true}
           autoDetect={true}
-          customPlaceholder="Upload video (1:1, 4:5, 9:16)"
+          customPlaceholder="Video in 9:16, 4:5, 1:1"
         />
       </div>
     </div>

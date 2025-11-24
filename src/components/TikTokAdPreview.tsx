@@ -28,9 +28,7 @@ const TopNavigation = () => {
 const InteractionButtons = () => {
   return (
     <div className="absolute right-3 bottom-20 flex flex-col items-center space-y-4">
-      <div className="w-8 h-8 rounded-full border-white flex items-center justify-center">
-        <img src={'/icon128.png'} alt="Profile" className="w-8 h-8 rounded-full flex-shrink-0" />
-      </div>
+      <div className="w-8 h-8 rounded-full border-2 bg-gray-500 border-white flex items-center justify-center"></div>
       <div className="flex flex-col items-center">
         <Heart className="w-6 h-6 fill-white stroke-white" />
         <span className="text-xs mt-1">15</span>
@@ -155,7 +153,7 @@ export const TikTokAdPreview: React.FC<TikTokAdPreviewProps> = ({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const [ctaColor, setCtaColor] = useState('#440099'); // Default color
+  const [ctaColor, setCtaColor] = useState('#e75710'); // Default color
   const [ctaTextColor, setCtaTextColor] = useState('#ffffff'); // Default text color
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -442,12 +440,12 @@ export const TikTokAdPreview: React.FC<TikTokAdPreviewProps> = ({
               </button>
             </div>
           ) : (
-            <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+            <div className="w-full h-full bg-[#E5E7EB] flex items-center justify-center relative z-10">
               <div className="text-center text-gray-400">
-                <svg className="w-16 h-16 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 </svg>
-                <div className="text-sm font-medium">TikTok Video</div>
+                <div className="text-sm font-medium text-gray-600">Ad image/video</div>
               </div>
             </div>
           )}

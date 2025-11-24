@@ -1,6 +1,7 @@
 import React from 'react';
 import { LinkedInAd } from '../types/ads';
 import { ImageUploader } from './ImageUploader';
+import { useToast } from '../contexts/ToastContext';
 
 interface LinkedInAdEditorProps {
   ad: LinkedInAd;
@@ -15,6 +16,8 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
   placement,
   onPlacementChange,
 }) => {
+  const { showToast } = useToast();
+  
   const handleChange = (field: keyof LinkedInAd, value: string | number | string[]) => {
     onChange({ ...ad, [field]: value });
   };
@@ -165,7 +168,72 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
           <ImageUploader
             label="Asset"
             value={ad.image}
-            onChange={(image) => handleChange('image', image)}
+            onChange={(image) => {
+              // Update both image and mediaType in a single state update
+              const isVideo = image.startsWith('data:video');
+              
+              if (isVideo) {
+                // Validate video aspect ratio - only accept 3:4 or 1:1
+                const video = document.createElement('video');
+                video.src = image;
+                video.onloadedmetadata = () => {
+                  const videoWidth = video.videoWidth;
+                  const videoHeight = video.videoHeight;
+                  const aspectRatio = videoWidth / videoHeight;
+                  
+                  // Check if aspect ratio is approximately 3:4 (0.75) or 1:1 (1.0)
+                  // Allow small tolerance for rounding (0.01)
+                  const is3to4 = Math.abs(aspectRatio - 0.75) < 0.01;
+                  const is1to1 = Math.abs(aspectRatio - 1.0) < 0.01;
+                  
+                  if (!is3to4 && !is1to1) {
+                    showToast('LinkedIn videos must be in 3:4 or 1:1 aspect ratio. Please upload a video with the correct dimensions.', 'error');
+                    // Reset file input
+                    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                    if (fileInput) {
+                      fileInput.value = '';
+                    }
+                    return;
+                  }
+                  
+                  // Valid aspect ratio, proceed with update
+                  onChange({ ...ad, image, mediaType: 'video' });
+                };
+                video.onerror = () => {
+                  showToast('Failed to load video. Please try again.', 'error');
+                };
+              } else {
+                // Validate image aspect ratio - only accept 3:4 or 1:1
+                const img = new Image();
+                img.src = image;
+                img.onload = () => {
+                  const imageWidth = img.width;
+                  const imageHeight = img.height;
+                  const aspectRatio = imageWidth / imageHeight;
+                  
+                  // Check if aspect ratio is approximately 3:4 (0.75) or 1:1 (1.0)
+                  // Allow small tolerance for rounding (0.01)
+                  const is3to4 = Math.abs(aspectRatio - 0.75) < 0.01;
+                  const is1to1 = Math.abs(aspectRatio - 1.0) < 0.01;
+                  
+                  if (!is3to4 && !is1to1) {
+                    showToast('LinkedIn images must be in 3:4 or 1:1 aspect ratio. Please upload an image with the correct dimensions.', 'error');
+                    // Reset file input
+                    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                    if (fileInput) {
+                      fileInput.value = '';
+                    }
+                    return;
+                  }
+                  
+                  // Valid aspect ratio, proceed with update
+                  onChange({ ...ad, image, mediaType: 'image' });
+                };
+                img.onerror = () => {
+                  showToast('Failed to load image. Please try again.', 'error');
+                };
+              }
+            }}
             aspectRatio={placement}
             allowVideo={true}
             autoDetect={true}
@@ -188,17 +256,11 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
               + Add more (Max 10)
             </button>
           </div>
-          <div className="flex gap-6 mb-3 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span className="text-gray-500">File: jpg or png (Max 10MB)</span>
-            </div>
-          </div>
           <div className="space-y-3">
             {/* First two images in two-column layout */}
-            <div className="flex gap-3">
+            <div className="flex gap-0.5">
               {(ad.carouselImages || ['', '']).slice(0, 2).map((image, index) => (
-                <div key={index} className="flex justify-center">
+                <div key={index} className="flex-1">
                   <ImageUploader
                     label={`Image ${index + 1}`}
                     value={image || ''}
@@ -212,11 +274,12 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
               ))}
             </div>
 
-            {/* Additional images in two-column rows */}
+            {/* Additional images in consistent two-column grid layout */}
             {(() => {
               const additionalImages = (ad.carouselImages || []).slice(2);
-              const rows = [];
+              if (additionalImages.length === 0) return null;
 
+              const rows = [];
               for (let i = 0; i < additionalImages.length; i += 2) {
                 const image1 = additionalImages[i];
                 const image2 = additionalImages[i + 1];
@@ -224,8 +287,8 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
                 const imageNumber2 = i + 4;
 
                 rows.push(
-                  <div key={i + 2} className="flex gap-3">
-                    <div className="flex-1 relative">
+                  <div key={i + 2} className="flex gap-0.5">
+                    <div className="flex-1">
                       <ImageUploader
                         label={`Image ${imageNumber1}`}
                         value={image1 || ''}
@@ -236,8 +299,8 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
                         labelClassName="text-xs"
                       />
                     </div>
-                    <div className="flex-1 relative">
-                      {image2 !== undefined ? (
+                    {image2 !== undefined ? (
+                      <div className="flex-1">
                         <ImageUploader
                           label={`Image ${imageNumber2}`}
                           value={image2 || ''}
@@ -247,12 +310,12 @@ export const LinkedInAdEditor: React.FC<LinkedInAdEditorProps> = ({
                           autoDetect={false}
                           labelClassName="text-xs"
                         />
-                      ) : (
-                        <div className="flex-1">
-                          {/* Empty space for next image */}
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="flex-1">
+                        {/* Empty space - will be filled when next image is added */}
+                      </div>
+                    )}
                   </div>
                 );
               }

@@ -141,7 +141,13 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
         <ImageUploader
           label="Asset"
           value={ad.image}
-          onChange={(image) => handleChange('image', image)}
+          onChange={(image) => {
+            // Update both image and mediaType in a single state update
+            const isVideo = image.startsWith('data:video');
+            const newAd = { ...ad, image, mediaType: isVideo ? 'video' : 'image' };
+            console.log('FacebookAdEditor: Updating ad state with image, hasImage:', !!newAd.image, 'isVideo:', isVideo);
+            onChange(newAd);
+          }}
           aspectRatio={placement}
           allowVideo={true}
           autoDetect={true}
