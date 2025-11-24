@@ -9,6 +9,7 @@ interface LinkedInAdPreviewProps {
   mode: PreviewMode;
   placement: '1:1' | '4:5' | '2:3' | '1:1.91';
   staticImage?: string;
+  logo?: string;
 }
 
 // LinkedIn Like Icon SVG Component
@@ -224,6 +225,7 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
   mode,
   placement,
   staticImage,
+  logo,
 }) => {
   const containerClass = mode === 'mobile' ? 'w-80' : 'max-w-md';
 
@@ -275,7 +277,10 @@ export const LinkedInAdPreview: React.FC<LinkedInAdPreviewProps> = ({
         <div className="bg-white mb-2 shadow-sm relative z-20">
           {/* Post header */}
           <div className="flex items-center p-3 relative z-20">
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-100">
+            <div id="avatar" className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-100">
+              {logo ? (
+                <img src={logo} alt="Brand Logo" className="w-full h-full object-cover" />
+              ) : null}
             </div>
             <div className="ml-3">
               <div className="font-semibold text-sm text-gray-900">{ad.businessName || 'Username'}</div>

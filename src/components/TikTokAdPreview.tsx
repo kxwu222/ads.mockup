@@ -9,6 +9,7 @@ interface TikTokAdPreviewProps {
   mode: PreviewMode;
   placement: string;
   staticImage?: string;
+  logo?: string;
 }
 
 const TopNavigation = () => {
@@ -25,10 +26,14 @@ const TopNavigation = () => {
   );
 };
 
-const InteractionButtons = () => {
+const InteractionButtons = ({ logo }: { logo?: string }) => {
   return (
-    <div className="absolute right-3 bottom-20 flex flex-col items-center space-y-4">
-      <div className="w-8 h-8 rounded-full border-2 bg-gray-500 border-white flex items-center justify-center"></div>
+    <div className="absolute right-3 bottom-20 flex flex-col items-center space-y-4 z-30">
+      <div id='avatar' className="w-8 h-8 rounded-full border-2 bg-gray-500 border-white flex items-center justify-center overflow-hidden">
+        {logo ? (
+          <img src={logo} alt="Brand Logo" className="w-full h-full object-cover" />
+        ) : null}
+      </div>
       <div className="flex flex-col items-center">
         <Heart className="w-6 h-6 fill-white stroke-white" />
         <span className="text-xs mt-1">15</span>
@@ -59,7 +64,7 @@ const SponsoredContent = ({ ad, ctaColor, ctaTextColor }: { ad: TikTokAd; ctaCol
   const truncatedText = displayText.substring(0, 100);
 
   return (
-    <div className="absolute bottom-16 left-3 mb-2" style={{ maxWidth: 'calc(100% - 120px)' }}>
+    <div className="absolute bottom-16 left-3 mb-2 z-30" style={{ maxWidth: 'calc(100% - 120px)' }}>
       <div className="bg-opacity-80">
         <div className="flex bg-transparent">
           <div className="flex-1">
@@ -108,7 +113,7 @@ const SponsoredContent = ({ ad, ctaColor, ctaTextColor }: { ad: TikTokAd; ctaCol
 
 const BottomNavigation = () => {
   return (
-    <div className="absolute bottom-0 left-0 w-full bg-black py-2">
+    <div className="absolute bottom-0 left-0 w-full bg-black py-2 z-30">
       <div className="flex justify-around items-center">
         <div className="flex flex-col items-center">
           <Home className="w-5 h-5" />
@@ -144,6 +149,7 @@ export const TikTokAdPreview: React.FC<TikTokAdPreviewProps> = ({
   mode,
   placement,
   staticImage,
+  logo,
 }) => {
   // Normalize placement to valid aspect ratio
   const normalizedPlacement: '9:16' | '4:5' | '1:1' =
@@ -440,7 +446,7 @@ export const TikTokAdPreview: React.FC<TikTokAdPreviewProps> = ({
               </button>
             </div>
           ) : (
-            <div className="w-full h-full bg-[#E5E7EB] flex items-center justify-center relative z-10">
+            <div className="w-full h-full bg-gray-900 flex items-center justify-center relative z-10">
               <div className="text-center text-gray-400">
                 <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -454,7 +460,7 @@ export const TikTokAdPreview: React.FC<TikTokAdPreviewProps> = ({
           <div className="absolute top-0 left-0 w-full pt-[4.19%] z-20">
             <TopNavigation />
           </div>
-          <InteractionButtons />
+          <InteractionButtons logo={logo} />
           <SponsoredContent ad={ad} ctaColor={ctaColor} ctaTextColor={ctaTextColor} />
           <BottomNavigation />
         </div>

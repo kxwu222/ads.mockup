@@ -9,6 +9,7 @@ interface InstagramAdPreviewProps {
   mode: PreviewMode;
   placement: '1:1' | '4:5' | '9:16' | '9:16-reel';
   staticImage?: string;
+  logo?: string;
 }
 
 export interface InstagramAdPreviewRef {
@@ -22,6 +23,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
     mode,
     placement,
     staticImage,
+    logo,
   }, ref) => {
   // Debug: Log when ad.image changes
   useEffect(() => {
@@ -359,23 +361,23 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
               className="w-full h-full object-cover"
             />
           ) : ad.image ? (
-              ad.image.startsWith('data:video') ? (
-                <video
-                  ref={videoRef}
-                  src={ad.image}
-                  className="w-full h-full object-cover relative z-10"
-                  style={{ backgroundColor: 'rgb(1, 2, 3)', objectFit: 'cover' }}
-                  crossOrigin="anonymous"
-                  muted={isMuted}
-                  loop
-                  playsInline
-                  autoPlay
-                />
+            ad.image.startsWith('data:video') ? (
+              <video
+                ref={videoRef}
+                src={ad.image}
+                className="w-full h-full object-contain relative z-10"
+                style={{ backgroundColor: 'rgb(1, 2, 3)', objectFit: 'contain' }}
+                crossOrigin="anonymous"
+                muted={isMuted}
+                loop
+                playsInline
+                autoPlay
+              />
             ) : (
               <img
                 src={ad.image}
                 alt="Ad"
-                className="w-full h-full object-cover relative z-10"
+                className="w-full h-full object-contain relative z-10"
               />
             )
           ) : (
@@ -407,8 +409,12 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
           </div>
           <div className="w-full px-3 py-4 flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-gray-100 rounded-full mr-2 flex items-center justify-center border border-white/20">
-                <div className="w-8 h-8 rounded-full flex-shrink-0" />
+              <div className="w-8 h-8 bg-gray-100 rounded-full mr-2 flex items-center justify-center border border-white/20 overflow-hidden">
+                <div id="avatar" className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden">
+                  {logo ? (
+                    <img src={logo} alt="Brand Logo" className="w-full h-full object-cover" />
+                  ) : null}
+                </div>
               </div>
               <div>
                 <p className="text-sm font-semibold drop-shadow-md">{ad.businessName || 'username'}</p>
@@ -531,13 +537,13 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
                 playsInline
                 autoPlay
               />
-              ) : (
-                <img
-                  src={ad.image}
-                  alt="Ad"
-                  className="w-full h-full object-contain bg-black relative z-10"
-                />
-              )
+            ) : (
+              <img
+                src={ad.image}
+                alt="Ad"
+                className="w-full h-full object-contain bg-black relative z-10"
+              />
+            )
           ) : (
             <div className="w-full h-full flex items-center justify-center relative z-10">
               <div className="text-center text-gray-400">
@@ -552,7 +558,7 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
           )}
 
           {/* Top Overlay Gradient inside placement area */}
-          <div 
+          <div
             className="absolute top-0 left-0 w-full h-24 z-10 pointer-events-none"
             style={{
               background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent)'
@@ -631,7 +637,11 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
           <div className="flex flex-col justify-center w-full h-full">
             <div className="flex items-center mb-2">
               <div className="w-8 h-8 bg-white rounded-full mr-1 overflow-hidden border border-white/20">
-                <div className="w-8 h-8 object-cover flex-shrink-0" />
+                <div id="avatar" className="w-8 h-8 object-cover flex-shrink-0 overflow-hidden">
+                  {logo ? (
+                    <img src={logo} alt="Brand Logo" className="w-full h-full object-cover" />
+                  ) : null}
+                </div>
               </div>
               <span className="font-semibold text-xs text-white shadow-black drop-shadow-md">
                 {ad.businessName || 'username'}
@@ -739,8 +749,12 @@ export const InstagramAdPreview = forwardRef<InstagramAdPreviewRef, InstagramAdP
         <div className="w-full pb-4">
           {/* Header */}
           <div className="flex items-center p-3">
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-              <div className="w-8 h-8 rounded-full flex-shrink-0" />
+            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3 overflow-hidden">
+              <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden">
+                {logo ? (
+                  <img src={logo} alt="Brand Logo" className="w-full h-full object-cover" />
+                ) : null}
+              </div>
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold leading-none">{ad.businessName || 'username'}</p>

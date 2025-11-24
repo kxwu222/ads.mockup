@@ -144,7 +144,7 @@ export const FacebookAdEditor: React.FC<FacebookAdEditorProps> = ({
           onChange={(image) => {
             // Update both image and mediaType in a single state update
             const isVideo = image.startsWith('data:video');
-            const newAd = { ...ad, image, mediaType: isVideo ? 'video' : 'image' };
+            const newAd = { ...ad, image, mediaType: (isVideo ? 'video' : 'image') as 'image' | 'video' };
             console.log('FacebookAdEditor: Updating ad state with image, hasImage:', !!newAd.image, 'isVideo:', isVideo);
             onChange(newAd);
           }}

@@ -11,6 +11,7 @@ interface ImageUploaderProps {
   autoDetect?: boolean;
   customPlaceholder?: string;
   labelClassName?: string;
+  className?: string;
 }
 
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
@@ -22,7 +23,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   allowVideo = false,
   autoDetect = false,
   customPlaceholder,
-  labelClassName
+  labelClassName,
+  className
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -92,6 +94,68 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             let height = img.height;
             const maxDim = 600; // Changed from 800 to 600
 
+            // Validate aspect ratio if specified
+            if (aspectRatio && !isLogo) {
+              const actualRatio = width / height;
+              let expectedRatio = 1;
+              let ratioName = aspectRatio;
+
+              // Parse expected ratio
+              if (aspectRatio === '1:1' || aspectRatio === '1/1') {
+                expectedRatio = 1;
+                ratioName = '1:1';
+              } else if (aspectRatio === '4:5' || aspectRatio === '4/5') {
+                expectedRatio = 4 / 5;
+                ratioName = '4:5';
+              } else if (aspectRatio === '9:16' || aspectRatio === '9/16' || aspectRatio === '9:16-reel') {
+                expectedRatio = 9 / 16;
+                ratioName = '9:16';
+              } else if (aspectRatio === '16:9' || aspectRatio === '16/9') {
+                expectedRatio = 16 / 9;
+                ratioName = '16:9';
+              }
+
+              // Check if ratio matches (with 15% tolerance)
+              const tolerance = 0.15;
+              const ratioDiff = Math.abs(actualRatio - expectedRatio) / expectedRatio;
+
+              if (ratioDiff > tolerance) {
+                // Show warning but still allow the upload
+                const actualRatioStr = `${width}×${height}`;
+                console.warn(`Image aspect ratio (${actualRatioStr}) doesn't match expected ${ratioName}`);
+
+                // Create a temporary toast notification
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow-lg z-50 max-w-md';
+                toast.innerHTML = `
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                      </svg>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-yellow-800">Aspect ratio mismatch</p>
+                      <p class="text-sm text-yellow-700 mt-1">Expected ${ratioName}, got ${actualRatioStr}. The image will be fitted to the preview.</p>
+                    </div>
+                    <button class="ml-auto flex-shrink-0 text-yellow-400 hover:text-yellow-600" onclick="this.parentElement.parentElement.remove()">
+                      <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                      </svg>
+                    </button>
+                  </div>
+                `;
+                document.body.appendChild(toast);
+
+                // Auto-remove after 6 seconds
+                setTimeout(() => {
+                  if (toast.parentElement) {
+                    toast.remove();
+                  }
+                }, 6000);
+              }
+            }
+
             if (width > maxDim || height > maxDim) {
               if (width > height) {
                 height = Math.round((height * maxDim) / width);
@@ -144,14 +208,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const displayRatio = aspectRatio?.replace('/', ':');
 
-  const containerStyle = {
-    width: '200px',
-    height: '200px',
-    minWidth: '200px',
-    minHeight: '200px',
-    maxWidth: '250px',
-    maxHeight: '250px'
-  };
+
 
   const renderPlaceholder = () => {
     let placeholderText = "Upload image";
@@ -234,8 +291,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           transition-all duration-200
           bg-gray-50 hover:bg-gray-100/50
           flex-shrink-0
+          ${className || 'w-[250px] h-[200px]'}
         `}
-        style={containerStyle}
         role="button"
         tabIndex={0}
         aria-label={customPlaceholder ? customPlaceholder : (autoDetect ? 'Upload image or video' : (allowVideo ? 'Upload video' : 'Upload image'))}

@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import icon128 from '/icon128.png';
 import { AdType } from '../types/ads';
-import { Download, ChevronDown } from 'lucide-react';
+import { Download, ChevronDown, Store, Upload, Sticker } from 'lucide-react';
+import { ImageUploader } from './ImageUploader';
 
 interface HeaderProps {
   activeType: AdType;
   onTypeChange: (type: AdType) => void;
   onExport: (format: 'png' | 'jpeg' | 'mp4') => void;
   hasVideo?: boolean;
+  globalLogo?: string;
+  onGlobalLogoChange?: (logo: string) => void;
 }
 
 type IconComponent = React.ComponentType<{ className?: string }> | (() => JSX.Element);
@@ -58,25 +61,30 @@ const adTypes: Array<{
     },
   ];
 
-export const Header: React.FC<HeaderProps> = ({ activeType, onTypeChange, onExport, hasVideo = false }) => {
+export const Header: React.FC<HeaderProps> = ({ activeType, onTypeChange, onExport, hasVideo = false, globalLogo, onGlobalLogoChange }) => {
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const [isBrandMenuOpen, setIsBrandMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const brandMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsExportMenuOpen(false);
       }
+      if (brandMenuRef.current && !brandMenuRef.current.contains(event.target as Node)) {
+        setIsBrandMenuOpen(false);
+      }
     };
 
-    if (isExportMenuOpen) {
+    if (isExportMenuOpen || isBrandMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isExportMenuOpen]);
+  }, [isExportMenuOpen, isBrandMenuOpen]);
 
   const handleExportClick = (format: 'png' | 'jpeg' | 'mp4') => {
     onExport(format);
@@ -128,9 +136,40 @@ export const Header: React.FC<HeaderProps> = ({ activeType, onTypeChange, onExpo
                 );
               })}
             </div>
+
+            {onGlobalLogoChange && (
+              <div className="relative" ref={brandMenuRef}>
+                <button
+                  onClick={() => setIsBrandMenuOpen(!isBrandMenuOpen)}
+                  className="flex items-center space-x-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                >
+                  <Sticker className="h-4 w-4" />
+                  <span>Brand logo</span>
+                </button>
+
+                {isBrandMenuOpen && (
+                  <div className="absolute left-0 mt-2 w-80 bg-white rounded-md shadow-lg p-4 z-50 border border-gray-200 ring-1 ring-black ring-opacity-5">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Brand Settings</h3>
+                    <div className="mb-2">
+                      <ImageUploader
+                        label="Global Logo"
+                        value={globalLogo || ''}
+                        onChange={onGlobalLogoChange}
+                        aspectRatio="1:1"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        This logo will be applied to the avatar area across all ad platforms.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+
+
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}

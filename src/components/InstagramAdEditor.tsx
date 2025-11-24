@@ -104,7 +104,6 @@ export const InstagramAdEditor: React.FC<InstagramAdEditorProps> = ({
         </label>
         <input
           type="text"
-          value={ad.businessName}
           onChange={(e) => handleChange('businessName', e.target.value)}
           className="w-11/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           placeholder="Enter your username"
@@ -191,8 +190,8 @@ export const InstagramAdEditor: React.FC<InstagramAdEditorProps> = ({
           autoDetect={true}
           customPlaceholder={
             placement === '9:16' ? "Upload image or video" :
-            placement === '9:16-reel' ? "Video in 9:16, 4:5, 1:1" :
-            undefined
+              placement === '9:16-reel' ? "Video in 9:16, 4:5, 1:1" :
+                undefined
           }
         />
         {(placement === '9:16' || placement === '9:16-reel')}
